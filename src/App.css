@@ -121,3 +121,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.layout {
+  display: grid; 
+  grid-template-rows: auto 1fr; 
+  grid-template-columns: auto 1fr; 
+  grid-template-areas:
+    "header header header"
+    "sidebar main inspector"
+    "sidebar main inspector";
+}
+
+.sidebar {
+  grid-area: header;
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+.main {
+  grid-area: main;
+}
+.inspector {
+  grid-area: inspector;
+}
