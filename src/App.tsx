@@ -1,5 +1,5 @@
 import "./App.css";
-import { Maximize, Minus, X } from "lucide-react";
+import { ChevronsUpDown, Inbox, Maximize, Minus, Tag, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {  useCallback, useRef } from "react";
 import { Button } from "./components/ui/button";
@@ -71,7 +71,7 @@ function App() {
  const virtualItems = virtualizer.getVirtualItems();
 
   return (
-    <main className="layout select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-screen w-screen font-outfit overflow-hidden">
+    <main className="layout select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-screen w-screen font-outfit overflow-hidden text-white">
       {/* HEADER */}
       <div
         className="header absolute top-0 left-0 right-0 h-8 z-20 w-full flex items-center "
@@ -105,9 +105,41 @@ function App() {
           </Button>
         </div>
       </div>
-      <div className="sidebar bg-amber-300 min-w-[200px]">Sidebar</div>
+      <div className="sidebar bg-neutral-800 min-w-[200px] px-4 pt-4 border-r border-neutral-700 ">
+        {/* HEADER-SIDEBAR */}
+        <div className="">
+          <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold">
+              <div className="size-5 rounded-sm bg-amber-300"></div>
+              <span>My library</span>
+            </div>
+
+            <ChevronsUpDown size={16} />
+          </div>
+        </div>
+
+        {/* SIDEBAR BODY */}
+        <div className="mt-4 flex flex-col ">
+          <div className="flex items-center gap-2 py-1.5 text-xs font-medium rounded-md">
+            <Inbox size={18} />
+            <span>All</span>
+          </div>
+          <div className="flex items-center gap-2 py-1.5  text-xs font-medium rounded-md">
+            <Tag size={18} />
+            <span>All Tags</span>
+          </div>
+        </div>
+
+        {/* FOLDERS SIDEBAR */}
+        <div className="mt-4  border-t/ border-neutral-700/">
+          <span className="text-sm">Folders</span>
+          <div className="bg-neutral-600">
+            a
+          </div>
+        </div>
+      </div>
       {/* CONTENT */}
-      <div className="main bg-sky-200 pt-2  w-full ">
+      <div className="main bg-neutral-900 pt-2  w-full ">
         <div className="">Header</div>
 
         <div
@@ -143,7 +175,7 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="inspector bg-red-300 min-w-[200px]">Inspector</div>
+      <div className="inspector bg-neutral-800 min-w-[200px]"></div>
       {/* <HeaderButtons></HeaderButtons>
       <h1 className="text-amber-200">Hello World</h1> */}
     </main>
