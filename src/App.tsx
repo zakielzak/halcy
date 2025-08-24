@@ -2,8 +2,24 @@ import "./App.css";
 import HeaderButtons from "./components/HeaderButtons";
 import { Maximize, Minus, Radio, Settings, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef } from "react";
 import { Button } from "./components/ui/button";
+import ImagePlaceholder from "./components/ImagePlaceholder";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { usePositioner } from "./components/masonry/use-positioner";
+
+
+const mockImageData = Array.from({ length: 200}, (_, i) => ({
+  id: i,
+  with: Math.floor(Math.random() * (350 - 150 + 1)) + 150,
+  height: Math.floor(Math.random() * (350 - 150 + 1)) + 150,
+}))
+
+
+const MasonryTest = ({ items, width}) => {
+  const containerRef = useRef(null);
+  const [computedColumnWidth, computedColumnCount] = getColums(width)
+}
 
 
 function App() {
@@ -16,6 +32,9 @@ function App() {
       []
     );
     const close = useCallback(async () => appWindow.close(), []);
+
+
+
   
   return (
     <main className="layout select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-screen w-screen font-outfit overflow-hidden">
@@ -53,12 +72,26 @@ function App() {
         </div>
       </div>
       <div className="sidebar bg-amber-300 min-w-[200px]">Sidebar</div>
-      <div className="main bg-sky-200 pt-2 px-4">
-       
-        <div className="">
-          Header
+      <div className="main bg-sky-200 pt-2 px-4 w-full overflow-y-auto">
+        <div className="">Header</div>
+
+        <div
+          className=" "
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+            gap: "100px",
+          }}
+        >
+          {mockImageData.map((item) => (
+            <ImagePlaceholder
+              key={item.id}
+              index={item.id}
+              width={item.with}
+              heigth={item.height}
+            />
+          ))}
         </div>
-        <div className="">Imagenes</div>
       </div>
       <div className="inspector bg-red-300 min-w-[200px]">Inspector</div>
       {/* <HeaderButtons></HeaderButtons>
