@@ -146,3 +146,17 @@
 .inspector {
   grid-area: inspector;
 }
+
+
+
+.ListItemEven,
+.ListItemOdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: red;
+}
+
+.ListItemEven {
+  background-color: #e6e4dc;
+}

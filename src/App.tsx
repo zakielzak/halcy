@@ -1,41 +1,75 @@
 import "./App.css";
-import HeaderButtons from "./components/HeaderButtons";
-import { Maximize, Minus, Radio, Settings, X } from "lucide-react";
+import { Maximize, Minus, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { memo, useCallback, useRef } from "react";
+import {  useCallback, useRef } from "react";
 import { Button } from "./components/ui/button";
-import ImagePlaceholder from "./components/ImagePlaceholder";
+
+
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { usePositioner } from "./components/masonry/use-positioner";
 
 
-const mockImageData = Array.from({ length: 200}, (_, i) => ({
-  id: i,
-  with: Math.floor(Math.random() * (350 - 150 + 1)) + 150,
-  height: Math.floor(Math.random() * (350 - 150 + 1)) + 150,
-}))
-
-
-const MasonryTest = ({ items, width}) => {
-  const containerRef = useRef(null);
-  const [computedColumnWidth, computedColumnCount] = getColums(width)
+interface ImageData {
+  id: number;
+  height: number;
 }
+
+// Data simulated
+// We don't need width for virtualization & masonry layout
+const images: ImageData[] = new Array(10000).fill(true).map((_, i) => ({
+  id: i,
+  height: 200 + Math.round(Math.random() * 200),
+}));
+
+const ImageCard = ({ index, height, style }: { index: number; height: number; style: React.CSSProperties }) => {
+  return (
+    <div
+      style={{
+        ...style,
+        height: `${height}px`,
+        backgroundColor: '#3498db',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '14px',
+        color: '#888',
+        border: '1px solid #ccc',
+        borderRadius: '5px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      }}
+    >
+      Item {index}
+    </div>
+  );
+};
 
 
 function App() {
+  const appWindow = getCurrentWindow();
 
-    const appWindow = getCurrentWindow();
+  const minimize = useCallback(async () => appWindow.minimize(), []);
+  const toggleMaximize = useCallback(
+    async () => appWindow.toggleMaximize(),
+    []
+  );
+  const close = useCallback(async () => appWindow.close(), []);
 
-    const minimize = useCallback(async () => appWindow.minimize(), []);
-    const toggleMaximize = useCallback(
-      async () => appWindow.toggleMaximize(),
-      []
-    );
-    const close = useCallback(async () => appWindow.close(), []);
+  // VIRTUALIZER
+ const parentRef = useRef<HTMLDivElement>(null);
 
+ const gapY = 15
+ const gapX = 7
+ const numColumns = 4; 
 
+ const virtualizer = useVirtualizer({
+   count: images.length,
+   getScrollElement: () => parentRef.current,
+   estimateSize: (index) => images[index].height + gapY,
+   overscan: 5,
+   lanes: numColumns, 
+ });
 
-  
+ const virtualItems = virtualizer.getVirtualItems();
+
   return (
     <main className="layout select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-screen w-screen font-outfit overflow-hidden">
       {/* HEADER */}
@@ -72,25 +106,41 @@ function App() {
         </div>
       </div>
       <div className="sidebar bg-amber-300 min-w-[200px]">Sidebar</div>
-      <div className="main bg-sky-200 pt-2 px-4 w-full overflow-y-auto">
+      {/* CONTENT */}
+      <div className="main bg-sky-200 pt-2  w-full ">
         <div className="">Header</div>
 
         <div
-          className=" "
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-            gap: "100px",
-          }}
+          ref={parentRef}
+          className="List h-full w-full relative overflow-y-auto pr-6 pl-4"
         >
-          {mockImageData.map((item) => (
-            <ImagePlaceholder
-              key={item.id}
-              index={item.id}
-              width={item.with}
-              heigth={item.height}
-            />
-          ))}
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+            }}
+            className="w-full relative "
+          >
+            {virtualItems.map((virtualItem) => {
+              const item = images[virtualItem.index];
+
+              return (
+                <ImageCard
+                  key={virtualItem.key}
+                  index={virtualItem.index}
+                  height={item.height}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: `calc(${(100 / numColumns) * virtualItem.lane}% + ${
+                      virtualItem.lane * gapX
+                    }px)`,
+                    width: `calc(${100 / numColumns}% - ${gapX}px)`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
       <div className="inspector bg-red-300 min-w-[200px]">Inspector</div>
