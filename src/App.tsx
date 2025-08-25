@@ -1,11 +1,12 @@
 import "./App.css";
-import { ChevronsUpDown, Inbox, Maximize, Minus, Tag, X } from "lucide-react";
+import { ChevronsUpDown, Inbox, Maximize, Minus, Shuffle, Tag, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {  useCallback, useRef } from "react";
 import { Button } from "./components/ui/button";
 
 
 import { useVirtualizer } from "@tanstack/react-virtual";
+import LibrarySwitching from "./components/LibrarySwitching";
 
 
 interface ImageData {
@@ -108,14 +109,8 @@ function App() {
       <div className="sidebar bg-neutral-800 min-w-[200px] px-4 pt-4 border-r border-neutral-700 ">
         {/* HEADER-SIDEBAR */}
         <div className="">
-          <div className="flex items-center gap-0.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold">
-              <div className="size-5 rounded-sm bg-amber-300"></div>
-              <span>My library</span>
-            </div>
-
-            <ChevronsUpDown size={16} />
-          </div>
+          {/* Library Switching */}
+          <LibrarySwitching/>
         </div>
 
         {/* SIDEBAR BODY */}
@@ -128,14 +123,16 @@ function App() {
             <Tag size={18} />
             <span>All Tags</span>
           </div>
+          <div className="flex items-center gap-2 py-1.5  text-xs font-medium rounded-md">
+            <Shuffle size={18} />
+            <span>Random</span>
+          </div>
         </div>
 
         {/* FOLDERS SIDEBAR */}
         <div className="mt-4  border-t/ border-neutral-700/">
           <span className="text-sm">Folders</span>
-          <div className="bg-neutral-600">
-            a
-          </div>
+          <div className="bg-neutral-600">a</div>
         </div>
       </div>
       {/* CONTENT */}
