@@ -1,5 +1,5 @@
 import { LazyStore } from "@tauri-apps/plugin-store";
-import { EventBus } from "@/lib/utils";
+import { EventBus } from "./utils";
 
 
 export interface Settings {
