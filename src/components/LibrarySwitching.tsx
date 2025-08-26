@@ -15,8 +15,7 @@ import {
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { cn } from "../lib/utils";
-import { useSetting } from '../hooks/useSettings';
-import { open as openDialog } from "@tauri-apps/plugin-dialog";
+import { useLibrary } from '../hooks/useLibrary';
 
  
 
@@ -25,9 +24,13 @@ function LibrarySwitching() {
 
   const [open, setOpen] = useState(false);
 
-  const [rootDir, setRootDir] = useSetting("rootDir", "")
-  const [libraryHistory, , updateLibraryHistory] = useSetting("libraryHistory", []);
+  const { rootDir , libraryHistory, currentLibraryName, handleLibrarySelect, createNewLibrary, removeLibrary} = useLibrary()
 
+/*   const [rootDir, setRootDir] = useSetting("rootDir", "")
+  const [libraryHistory, , updateLibraryHistory] = useSetting("libraryHistory", []); */
+
+  
+/* 
 
   const handleLibrarySelect = async (path: string) => {
     // Check if the path is different to avoid unnecesary writes
@@ -45,26 +48,46 @@ function LibrarySwitching() {
     setOpen(false);
   }
 
-  // Create a folder and select directory
+  const getLibraryNameFromUser = async (): Promise<string | null> => {
+    const name = prompt("Please enter a name for your new library:");
+    return name;
+  };
+
   const createNewLibrary = async () => {
+
+    const libraryName = await getLibraryNameFromUser();
+
+    if (!libraryName) return
+
     // Open a native directory dialog
-    const result = await openDialog({
+    const selectedDirectory = await openDialog({
       directory: true,
       multiple: false,
     })
 
     // Check if the user selected a directory
-    if (result) {
-      const newLibraryPath = result as string;
-      
-      await setRootDir(newLibraryPath);
-      if (updateLibraryHistory) {
+    if (selectedDirectory) {
+     const newLibraryPath = `${selectedDirectory}/${libraryName}.library`;
+
+      try {
+        await invoke("create_library", {libraryPath: newLibraryPath})
+        
+         await setRootDir(newLibraryPath);
+         if (updateLibraryHistory) {
         await updateLibraryHistory(currentHistory => {
           // Ensure no duplicates and place the new path at the top
           const filteredHistory = currentHistory.filter(p => p !== newLibraryPath)
           return [newLibraryPath, ...filteredHistory];
         });
+      } 
+    }catch (e) {
+        console.error("Failed to create a new library", e)
+        
       }
+      
+     
+      
+      
     }
     setOpen(false);
   }
@@ -86,19 +109,21 @@ function LibrarySwitching() {
     }
   };
 
-
+ */
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild className="mt-7">
+      <PopoverTrigger asChild className="mt-7 ">
         <Button
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className=" z-40 px-1.5 py-2 h-auto w-full justify-start hover:bg-white/8 hover:text-white text-sm font-semibold"
+          className=" z-40 px-1.5 py-2 h-auto  overflow-hidden justify-start hover:bg-white/8 w-full gap-1 hover:text-white text-sm font-semibold"
         >
-          <div className="size-5 rounded-sm bg-amber-300 z-40"></div>
-          {rootDir || "No library selected"}
-          <ChevronsUpDown size={15} className="ml-auto" />
+          <div className="size-5 rounded-sm bg-amber-300 z-40 "></div>
+          <p className="truncate">
+            {currentLibraryName || "No library selected"}
+          </p>
+          <ChevronsUpDown size={13} className="ml-auto" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px p-0 dark" side="right" align="start">

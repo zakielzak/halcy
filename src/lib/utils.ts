@@ -21,3 +21,17 @@ export class EventBus {
     };
   }
 }
+
+export const getLibraryName = (path: string): string => {
+  if (!path) return "";
+  const parts = path.split(/[/\\]/); 
+  const nameWithExtension = parts.pop();
+  if (!nameWithExtension) return "";
+
+  // Remove the '.library' extension 
+  const name = nameWithExtension.endsWith(".library")
+    ? nameWithExtension.slice(0, -8)
+    : nameWithExtension;
+
+  return name || "";
+};
