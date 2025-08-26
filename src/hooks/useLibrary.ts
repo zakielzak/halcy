@@ -46,39 +46,11 @@ export function useLibrary() {
 
         await handleLibrarySelect(newLibraryPath);
 
-        /*  await setRootDir(newLibraryPath);
-        if (updateLibraryHistory) {
-          await updateLibraryHistory((currentHistory) => {
-            // Ensure no duplicates and place the new path at the top
-            const filteredHistory = currentHistory.filter(
-              (p) => p !== newLibraryPath
-            );
-            return [newLibraryPath, ...filteredHistory];
-          });
-        } */
       } catch (e) {
         console.error("Failed to create a new library", e);
       }
     }
   };
-
- /*  const removeLibrary = async (pathToRemove: string) => {
-    if (libraryHistory && updateLibraryHistory) {
-      // Use the update function to remove the path
-      if (updateLibraryHistory) {
-        await updateLibraryHistory((currentHistory) => {
-          return currentHistory.filter((p) => p !== pathToRemove);
-        });
-      }
-
-      // If the current rootDir is the one being removed, set it to the first in the new history
-      if (rootDir === pathToRemove) {
-        const newHistory = libraryHistory.filter((p) => p !== pathToRemove);
-        await setRootDir(newHistory[0] || "");
-      }
-    }
-  }; */
-
  
   const removeLibrary = async (pathToRemove: string) => {
     if (libraryHistory) {
