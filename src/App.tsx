@@ -21,34 +21,43 @@ interface ImageProps {
 
 // Data simulated
 // We don't need width for virtualization & masonry layout
-/* const images: ImageData[] = new Array(10000).fill(true).map((_, i) => ({
+const images: ImageData[] = new Array(10000).fill(true).map((_, i) => ({
   id: i,
   height: 200 + Math.round(Math.random() * 200),
 }));
 
-const ImageCard = ({ index, height, style }: { index: number; height: number; style: React.CSSProperties }) => {
+const ImageCard = ({ imagePath, index, height, style }: { imagePath: string; index: number; height: number; style: React.CSSProperties }) => {
+  const imageUrl = convertFileSrc(imagePath);
   return (
     <div
       style={{
         ...style,
         height: `${height}px`,
-        backgroundColor: '#3498db',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '14px',
-        color: '#888',
-        border: '1px solid #ccc',
-        borderRadius: '5px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        backgroundColor: "#3498db",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "14px",
+        color: "#888",
+        border: "1px solid #ccc",
+        borderRadius: "5px",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
       }}
     >
-      Item {index}
+      <img
+        src={imageUrl}
+        alt={imagePath.split("/").pop() || ""}
+        className={cn(
+          "object-cover w-full h-full transition-opacity duration-300",
+  
+        )}
+        /* onLoad={handleImageLoad} */
+      />
     </div>
   );
 };
- */
 
+/* 
 const ImageItem: React.FC<ImageProps> = ({ path, style}) => {
   const imageUrl = convertFileSrc(path);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -65,9 +74,9 @@ const ImageItem: React.FC<ImageProps> = ({ path, style}) => {
     <div style={style}>
       <div className="rounded-lg overflow-hidden h-full">
         <div className="p-0 h-full">
-          {/* {!imageLoaded && (
+          {!imageLoaded && (
             <Skeleton className="w-full h-full"/>
-          )} */}
+          )}
           <img
             ref={imgRef}
             src={imageUrl}
@@ -82,10 +91,10 @@ const ImageItem: React.FC<ImageProps> = ({ path, style}) => {
       </div>
     </div>
   );
-}
+} */
 
 function App() {
-  const { importImages } = useLibrary();
+  
 
   const appWindow = getCurrentWindow();
 
@@ -135,7 +144,7 @@ function App() {
   const gapX = 7;
   const numColumns = 4;
 
-/*   const virtualizer = useVirtualizer({
+  const virtualizer = useVirtualizer({
     count: images.length,
     getScrollElement: () => parentRef.current,
     estimateSize: (index) => images[index].height + gapY,
@@ -143,9 +152,9 @@ function App() {
     lanes: numColumns,
     getItemKey: (index) => imagePaths[index]
   });
- */
 
-  const virtualizer = useVirtualizer({
+
+ /*  const virtualizer = useVirtualizer({
     horizontal: false,
     getScrollElement: () => parentRef.current,
     count: imagePaths.length,
@@ -155,7 +164,7 @@ function App() {
       return element.getBoundingClientRect().height;
     },
     getItemKey: (index) => imagePaths[index],
-  });
+  }); */
 
   const virtualItems = virtualizer.getVirtualItems();
 
@@ -198,6 +207,8 @@ function App() {
           </Button>
         </div>
       </div>
+
+      
       <div className="sidebar bg-neutral-800 w-[200px]  px-2 pt-4 border-r border-neutral-700 ">
         {/* HEADER-SIDEBAR */}
         <div className="">
@@ -241,12 +252,14 @@ function App() {
             }}
             className="w-full relative "
           >
-            {/*  {virtualItems.map((virtualItem) => {
+             {virtualItems.map((virtualItem) => {
               const item = images[virtualItem.index];
+              const imagePath = imagePaths[virtualItem.index] ?? "";
 
               return (
                 <ImageCard
                   key={virtualItem.key}
+                  imagePath={imagePath}
                   index={virtualItem.index}
                   height={item.height}
                   style={{
@@ -260,8 +273,8 @@ function App() {
                   }}
                 />
               );
-            })} */}
-            {virtualItems.map((virtualItem) => {
+            })}
+          {/*   {virtualItems.map((virtualItem) => {
               const imagePath = imagePaths[virtualItem.index];
               return (
                 <ImageItem
@@ -278,13 +291,11 @@ function App() {
                   }}
                 />
               );
-            })}
+            })} */}
           </div>
         </div>
       </div>
       <div className="inspector bg-neutral-800 min-w-[200px]"></div>
-      {/* <HeaderButtons></HeaderButtons>
-      <h1 className="text-amber-200">Hello World</h1> */}
     </main>
   );
 }
