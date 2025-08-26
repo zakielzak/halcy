@@ -18,8 +18,6 @@ import { cn } from "../lib/utils";
 import { useLibrary } from '../hooks/useLibrary';
 
  
-
-
 function LibrarySwitching() {
 
   const [open, setOpen] = useState(false);
@@ -42,7 +40,7 @@ function LibrarySwitching() {
           <ChevronsUpDown size={13} className="ml-auto" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px p-0 dark" side="right" align="start">
+      <PopoverContent className="w-[400px] p-0 dark" side="right" align="start">
         <Command>
           <CommandInput placeholder="Search library..." />
           <CommandList>

@@ -63,6 +63,31 @@ export function useLibrary() {
     }
   };
 
+  const importImages = async () => {
+    if (!rootDir) {
+        console.warn("No active library selected.")
+        return;
+    }
+
+    const selectedDirectory = await open({
+        directory: true,
+        multiple: false,
+    })
+
+    if (selectedDirectory) {
+        try {
+            const importedCount = await invoke<number>("import_images", {
+                sourceDir: selectedDirectory as string,
+                destDir: rootDir,
+            });
+            console.log(`Successfully imported ${importedCount} images.`)
+            // TODO: Show message on UI
+        } catch (e) {
+            console.error("Failed to import images:", e);
+        }
+    }
+  }
+
   const currentLibraryName = getLibraryName(rootDir);
 
   return {
@@ -71,6 +96,7 @@ export function useLibrary() {
     libraryHistory,
     currentLibraryName,
     // Logic 
+    importImages,
     handleLibrarySelect,
     createNewLibrary,
     removeLibrary

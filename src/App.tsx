@@ -1,5 +1,5 @@
 import "./App.css";
-import { ChevronsUpDown, Inbox, Maximize, Minus, Shuffle, Tag, X } from "lucide-react";
+import { ChevronsUpDown, Inbox, Maximize, Minus, Plus, Shuffle, Tag, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {  useCallback, useRef } from "react";
 import { Button } from "./components/ui/button";
@@ -7,6 +7,7 @@ import { Button } from "./components/ui/button";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import LibrarySwitching from "./components/LibrarySwitching";
+import { useLibrary } from "./hooks/useLibrary";
 
 
 interface ImageData {
@@ -45,6 +46,10 @@ const ImageCard = ({ index, height, style }: { index: number; height: number; st
 
 
 function App() {
+
+  const { importImages } = useLibrary();
+
+
   const appWindow = getCurrentWindow();
 
   const minimize = useCallback(async () => appWindow.minimize(), []);
@@ -78,6 +83,14 @@ function App() {
         className="header absolute top-0 left-0 right-0 h-8 z-20 w-full flex items-center "
         data-tauri-drag-region
       >
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => importImages()}
+        >
+          <Plus size={16} strokeWidth={2} />
+        </Button>
+
         <div className="flex items-center absolute right-2 top-1">
           <Button
             size="icon"
@@ -110,7 +123,7 @@ function App() {
         {/* HEADER-SIDEBAR */}
         <div className="">
           {/* Library Switching */}
-          <LibrarySwitching/>
+          <LibrarySwitching />
         </div>
 
         {/* SIDEBAR BODY */}
