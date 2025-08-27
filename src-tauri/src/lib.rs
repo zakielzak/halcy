@@ -75,7 +75,7 @@ fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-fn create_library(app: AppHandle, library_path: String) -> Result<(), String> {
+fn create_library(app: AppHandle, library_path: String) -> Result<String, String> {
     let path = Path::new(&library_path);
 
     // Check if the dir already exists
@@ -90,21 +90,21 @@ fn create_library(app: AppHandle, library_path: String) -> Result<(), String> {
     fs::create_dir_all(&images_path)
         .map_err(|e| format!("Failed to create images directory: {}", e))?;
 
-   
-    // Use the `fs_scope()` method from the `FsExt` trait to grant access.
+    // Grant the webview access to the new library directory
     app.fs_scope()
-       .allow_directory(&path, true) // `true` for recursive access
-       .map_err(|e| format!("Failed to grant access to library: {}", e))?;
+        .allow_directory(&path, true) // `true` for recursive access
+        .map_err(|e| format!("Failed to grant access to library: {}", e))?;
 
     //Todo:  Start database sqlite for library
-    let db_path = path.join("metadata.sqlite");
+    let db_path = path.join("library.db");
 
-    Ok(())
+    Ok(db_path.to_string_lossy().to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
