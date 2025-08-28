@@ -1,3 +1,4 @@
+import { useImages } from '@/hooks/useImages';
 import { useLibrary } from '@/hooks/useLibrary';
 import { cn } from '@/lib/utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -12,10 +13,10 @@ interface ImageProps {
 
 // Data simulated
 // We don't need width for virtualization & masonry layout
-const images: ImageData[] = new Array(10000).fill(true).map((_, i) => ({
+/* const images: ImageData[] = new Array(10000).fill(true).map((_, i) => ({
   id: i,
   height: 200 + Math.round(Math.random() * 200),
-}));
+})); */
 
 const ImageCard = ({
   imagePath,
@@ -59,10 +60,17 @@ const ImageCard = ({
 
 function ImagesGallery() {
   // VIRTUALIZER
-  const { rootDir } = useLibrary();
+  const { rootDir, handleLibrarySelect } = useLibrary();
+  const { images } = useImages(`${rootDir}/library.db`)
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log(rootDir)
+    console.log(images)
+  }, [handleLibrarySelect]);
+
 
   /*   const { width } = useWindowSize(); */ // TODO: custom hook to Get window width to dynamically calculate columns
 

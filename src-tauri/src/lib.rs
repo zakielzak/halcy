@@ -13,7 +13,70 @@ use sqlx::{
 use rayon::prelude::*;
 use tauri::AppHandle;
 use tauri_plugin_fs::FsExt;
-use walkdir::WalkDir;
+use walkdir::{WalkDir, DirEntry as WalkDirEntry};
+
+fn get_image_files(dir: &str) -> impl ParallelIterator<Item = WalkDirEntry> {
+    let valid_extensions = vec!["jpg", "jpeg", "png", "gif", "jfif", "webp"];
+
+    WalkDir::new(dir)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+        .par_bridge()
+        .filter(move |entry| {
+            if let Some(ext) = entry.path().extension().and_then(|s| s.to_str()) {
+                valid_extensions.contains(&ext.to_lowercase().as_str())
+            } else {
+                false
+            }
+        })
+}
+
+
+
+#[tauri::command]
+fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
+    if !Path::new(&library_path).exists() {
+        return Err("Library path does not exist.".to_string());
+    }
+
+    let image_paths: Vec<String> = get_image_files(&library_path)
+        .map(|entry| entry.path().to_string_lossy().to_string())
+        .collect();
+
+    Ok(image_paths)
+}
+
+//---
+
+#[tauri::command]
+fn import_images(source_dir: String, dest_dir: String) -> Result<Vec<String>, String> {
+    let dest_path = Path::new(&dest_dir).join("images");
+
+    if !dest_path.exists() {
+        return Err("Destination directory does not exist.".to_string());
+    }
+
+    let imported_paths: Vec<String> = get_image_files(&source_dir)
+        .filter_map(|entry| {
+            let file_name = entry.path().file_name().unwrap();
+            let dest_file = dest_path.join(file_name);
+
+            match fs::copy(entry.path(), &dest_file) {
+                Ok(_) => Some(dest_file.to_string_lossy().to_string()),
+                Err(e) => {
+                    eprintln!("Failed to copy file {:?}: {}", entry.path(), e);
+                    None
+                }
+            }
+        })
+        .collect();
+
+    Ok(imported_paths)
+}
+
+/* 
+
 #[tauri::command]
 fn import_images(source_dir: String, dest_dir: String) -> Result<u32, String> {
     let dest_path = Path::new(&dest_dir).join("images");
@@ -79,7 +142,7 @@ fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
         .collect();
 
     Ok(image_paths)
-}
+} */
 
 #[tauri::command]
 fn create_library(app: AppHandle, library_path: String) -> Result<String, String> {
