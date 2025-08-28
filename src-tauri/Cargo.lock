@@ -1571,6 +1571,7 @@ dependencies = [
  "rayon",
  "serde",
  "serde_json",
+ "sqlx",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
@@ -1578,6 +1579,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tauri-plugin-sql",
  "tauri-plugin-store",
+ "tokio",
  "walkdir",
 ]
 
@@ -4721,6 +4723,7 @@ dependencies = [
  "io-uring",
  "libc",
  "mio",
+ "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "slab",

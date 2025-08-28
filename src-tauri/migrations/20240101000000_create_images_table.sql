@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS images (
+   id INTEGER PRIMARY KEY,
+   filename TEXT NOT NULL,
+   path TEXT NOT NULL,
+   width TEXT NOT NULL,
+   heigth TEXT NOT NULL
+);

@@ -4,6 +4,15 @@ import { open} from "@tauri-apps/plugin-dialog";
 import { getLibraryName } from "../lib/utils";
 import Database from "@tauri-apps/plugin-sql";
 
+// Define el tipo de la imagen para asegurar la seguridad de tipos
+interface ImageRecord {
+  id: number;
+  filename: string;
+  path: string;
+  width: string;
+  heigth: string;
+}
+
 export function useLibrary() {
   const [rootDir, setRootDir] = useSetting("rootDir", "");
   const [libraryHistory, setLibraryHistory, updateLibraryHistory] = useSetting(
@@ -13,11 +22,9 @@ export function useLibrary() {
 
   // A helper function to load and migrate the database
   const loadAndMigrateDb = async (dbPath: string) => {
-    // The load() function will create the file and run migrations if it's new
-    const db = await Database.load(`sqlite:${dbPath}`);
-    
-    console.log(`Successfully connected to and migrated database at ${dbPath}`);
-    return db;
+   
+   
+  
   };
 
   const handleLibrarySelect = async (path: string) => {
@@ -52,12 +59,62 @@ export function useLibrary() {
       const newLibraryPath = `${selectedDirectory}/${libraryName}.library`;
 
       try {
-        const dbPath = await invoke("create_library", { libraryPath: newLibraryPath });
+        const returnedDbPath = await invoke("create_library", { libraryPath: newLibraryPath });
+        console.log(returnedDbPath)
 
         // Ensure dbPath is a string before using it
-        if (typeof dbPath === "string") {
+        if (typeof returnedDbPath === "string") {
           // Now, use the returned path to load the database and apply migrations
-          await loadAndMigrateDb(dbPath);
+           const db = await Database.load(`sqlite:${returnedDbPath}`);
+          await invoke("run_migrations", { dbPath: returnedDbPath });
+          /*  await loadAndMigrateDb(returnedDbPath); */
+         
+          // The load() function will create the file and run migrations if it's new
+          try {
+            console.log(`${returnedDbPath}/library.db`);
+
+            // Define the test data
+            const testId = 1;
+            const testFilename = "test_image.jpg";
+            const testPath = "C:\\images\\test_image.jpg";
+            const testWidth = "1920";
+            const testHeight = "1080";
+
+            // Prepare the SQL statement with parameter placeholders.
+            // Using placeholders is a best practice to prevent SQL injection attacks.
+            const sql = `
+            INSERT INTO images (id, filename, path, width, heigth) 
+            VALUES ($1, $2, $3, $4, $5)
+        `;
+
+            // Execute the prepared statement with the test data.
+            const result = await db.execute(sql, [
+              testId,
+              testFilename,
+              testPath,
+              testWidth,
+              testHeight,
+            ]);
+
+              const selectSql = `
+      SELECT id, filename, path, width, heigth FROM images WHERE id = $1
+    `;
+
+        
+              const records = await db.select<ImageRecord[]>(selectSql, [
+                testId,
+              ]);
+
+              if (records.length > 0) {
+                console.log("Datos encontrados en la base de datos:");
+                console.log(records[0]);
+              } else {
+                console.log("No se encontraron registros.");
+              }
+          /*   return db; */
+          } catch (error) {
+            console.error(error);
+          }
           await handleLibrarySelect(newLibraryPath);
         } else {
           throw new Error("create_library did not return a string path");

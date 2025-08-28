@@ -3,6 +3,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use tauri_plugin_sql::{Builder, Migration, MigrationKind};
+
+use sqlx::{
+    migrate,
+    sqlite::SqlitePool
+};
+
 use rayon::prelude::*;
 use tauri::AppHandle;
 use tauri_plugin_fs::FsExt;
@@ -98,13 +105,55 @@ fn create_library(app: AppHandle, library_path: String) -> Result<String, String
     //Todo:  Start database sqlite for library
     let db_path = path.join("library.db");
 
-    Ok(db_path.to_string_lossy().to_string())
+    Ok(db_path.to_string_lossy().to_string().replace("\\", "/"))
 }
+
+#[tauri::command]
+async fn run_migrations(db_path: String) -> Result<(), String> {
+    // 1. Create a connection pool for the dynamic database path.
+    let db_url = format!("sqlite:{}", db_path);
+    let pool = SqlitePool::connect(&db_url)
+        .await
+        .map_err(|e| format!("Failed to connect to database pool: {}", e))?;
+
+    // 2. This macro will discover and run all migration files
+    // in the 'migrations' directory relative to the Cargo.toml file.
+    migrate!()
+        .run(&pool)
+        .await
+        .map_err(|e| format!("Failed to run migrations: {}", e))?;
+
+    Ok(())
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+
+    let migrations = vec![
+        Migration {
+            version: 1,
+            description: "create images table",
+            sql: "
+            CREATE TABLE IF NOT EXISTS images (
+               id INTEGER PRIMARY KEY,
+               filename TEXT NOT NULL,
+               path TEXT NOT NULL,
+               width TEXT NOT NULL,
+               heigth TEXT NOT NULL
+            );",
+            kind: MigrationKind::Up,
+        },
+    ];
+
+    
+
+
     tauri::Builder::default()
-        .plugin(tauri_plugin_sql::Builder::new().build())
+        .plugin(tauri_plugin_sql::Builder::new()
+                 .add_migrations("sqlite:library.db", migrations)
+                .build()
+        )
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -112,7 +161,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             create_library,
             import_images,
-            scan_library_images
+            scan_library_images,
+            run_migrations
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
