@@ -17,7 +17,7 @@ function Inspector() {
     const close = useCallback(async () => appWindow.close(), []);
 
   return (
-    <div className="inspector bg-neutral-800 w-[200px] flex flex-col">
+    <div className=" bg-neutral-800 w-[290px] flex flex-col">
       <div
         className="flex items-center justify-end  h-11 w-full  px-2"
         data-tauri-drag-region

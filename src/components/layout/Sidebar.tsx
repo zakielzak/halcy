@@ -8,9 +8,9 @@ import FileTree from '../FileTree';
 function Sidebar() {
    const { importImages } = useLibrary();
   return (
-    <div className="sidebar bg-neutral-800 w-[200px] border-r border-neutral-700 ">
+    <div className="flex flex-col bg-neutral-800 w-[290px] border-r border-neutral-700 h-full">
       <div
-        className="w-full h-11 flex items-center px-2 justify-end gap-1"
+        className="w-full h-16 flex items-center px-2 justify-end gap-1"
         data-tauri-drag-region
       >
         <Button size="icon" variant="ghost" onClick={() => importImages()}>
@@ -58,7 +58,7 @@ function Sidebar() {
       </div>
 
       {/* FOLDERS SIDEBAR */}
-      <div className="mt-4  border-t/ border-neutral-700/   h-full overflow-y-auto ">
+      <div className="mt-4  border-t/ border-neutral-700/   h-full overflow-y-auto scrollbar">
         <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 ">
           Folders
           <span className="text-[11px]">{`(3)`}</span>

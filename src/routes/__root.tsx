@@ -16,7 +16,7 @@ function RootComponent() {
 
   return (
     <Fragment>
-      <main className="layout select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-screen w-screen font-outfit overflow-hidden text-white">
+      <main className="flex select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-dvh w-dvw font-outfit overflow-hidden text-white">
         {/* HEADER */}
         {/* <Header/> */}
 

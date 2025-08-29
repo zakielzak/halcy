@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   return (
-    <div className="main bg-neutral-900  w-full ">
+    <div className="flex flex-col bg-neutral-900  w-full ">
       <div
         className="px-3.5 h-13 flex gap-1 items-center justify-between "
         data-tauri-drag-region

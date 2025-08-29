@@ -12,7 +12,6 @@ interface TreeContextValue<T = any> {
   indent: number;
   currentItem?: ItemInstance<T>;
   tree?: any;
-  ref?: any;
 }
 
 const TreeContext = React.createContext<TreeContextValue>({
@@ -28,10 +27,9 @@ function useTreeContext<T = any>() {
 interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {
   indent?: number;
   tree?: any;
-  ref?: any;
 }
 
-function Tree({ indent = 20, tree, className, ref, ...props }: TreeProps) {
+function Tree({ indent = 20, tree, className, ...props }: TreeProps) {
   const containerProps =
     tree && typeof tree.getContainerProps === "function"
       ? tree.getContainerProps()
@@ -48,7 +46,7 @@ function Tree({ indent = 20, tree, className, ref, ...props }: TreeProps) {
   } as React.CSSProperties;
 
   return (
-    <TreeContext.Provider value={{ indent, tree, ref }}>
+    <TreeContext.Provider value={{ indent, tree }}>
       <div
         data-slot="tree"
         style={mergedStyle}
@@ -155,14 +153,14 @@ function TreeItemLabel<T = any>({
     <span
       data-slot="tree-item-label"
       className={cn(
-        " in-focus-visible:ring-ring/50 in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground in-data-[drag-target=true]:bg-accent flex items-center gap-1.5 rounded-sm pr-1 py-1.5 text-xs font-medium transition-colors not-in-data-[folder=true]:ps-7 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-50! [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        " in-focus-visible:ring-ring/50 in-data-[selected=true]:bg-accent in-data-[selected=true]:text-accent-foreground in-data-[drag-target=true]:bg-accent flex items-center gap-1.5 rounded-sm  pr-1 py-1.5 text-xs font-medium transition-colors not-in-data-[folder=true]:ps-7 in-focus-visible:ring-[3px] in-data-[search-match=true]:bg-blue-50! [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       {...props}
     >
       {item.isFolder() && (
-        <div className="flex gap-0.5 ">
-          <ChevronDownIcon className="text-muted-foreground size-3.5 in-aria-[expanded=false]:-rotate-90 transition-transform duration-150" />
+        <div className="flex items-center ml-1 gap-1">
+          <ChevronDownIcon className="text-muted-foreground size-3.5 in-aria-[expanded=false]:-rotate-90 transition-transform duration-150 " />
           <FolderIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:" />
         </div>
       )}
