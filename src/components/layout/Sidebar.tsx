@@ -2,6 +2,8 @@ import LibrarySwitching from '../LibrarySwitching';
 import { Inbox, Plus, Shuffle, SidebarIcon, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLibrary } from '@/hooks/useLibrary';
+import FileTree from '../FileTree';
+
 
 function Sidebar() {
    const { importImages } = useLibrary();
@@ -32,7 +34,7 @@ function Sidebar() {
         >
           <Inbox size={16} />
           <span>All</span>
-          <span className="ml-auto text-xs tracking-wider text-white/60">
+          <span className="ml-auto text-[10px] tracking-wider text-white/60">
             3,093
           </span>
         </Button>
@@ -42,7 +44,7 @@ function Sidebar() {
         >
           <Tag size={16} />
           <span>All Tags</span>
-          <span className="ml-auto text-xs tracking-wider text-white/60">
+          <span className="ml-auto text-[10px] tracking-wider text-white/60">
             2
           </span>
         </Button>
@@ -57,8 +59,12 @@ function Sidebar() {
 
       {/* FOLDERS SIDEBAR */}
       <div className="mt-4  border-t/ border-neutral-700/">
-        <span className="text-xs px-3">Folders</span>
-        <div className="bg-neutral-600">a</div>
+        <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1">
+          Folders
+          <span className="text-[11px]">{`(3)`}</span>
+        </div>
+
+        <FileTree />
       </div>
     </div>
   );
