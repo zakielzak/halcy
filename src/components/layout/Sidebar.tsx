@@ -58,8 +58,8 @@ function Sidebar() {
       </div>
 
       {/* FOLDERS SIDEBAR */}
-      <div className="mt-4  border-t/ border-neutral-700/">
-        <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1">
+      <div className="mt-4  border-t/ border-neutral-700/   h-full overflow-y-auto ">
+        <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 ">
           Folders
           <span className="text-[11px]">{`(3)`}</span>
         </div>

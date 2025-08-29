@@ -129,7 +129,6 @@
   grid-template-columns: auto 1fr; 
   grid-template-areas:
     "sidebar main inspector"
-    "sidebar main inspector"
     "sidebar main inspector";
 }
 
