@@ -11,13 +11,13 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   return (
-    <div className="flex flex-col bg-neutral-900  w-full ">
+    <div className="main flex flex-col bg-neutral-900  ">
       <div
-        className="px-3.5 h-13 flex gap-1 items-center justify-between "
+        className="px-3.5 h-15 flex gap-1 items-center justify-between "
         data-tauri-drag-region
       >
         <div className="flex pb-1 items-center">
-          <div className="flex gap-1">
+          <div className="flex ">
             <Button variant="ghost" size="icon">
               <ChevronLeft size={18} />
             </Button>
@@ -29,7 +29,7 @@ function RouteComponent() {
           <span className="text-xs font-medium">Folder</span>
         </div>
 
-        <div className="flex w-[130px] gap-1.5">
+        <div className="flex w-[160px] gap-1.5">
           <Button variant="ghost" size="icon">
             <Plus size={13} />
           </Button>

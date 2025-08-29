@@ -8,9 +8,9 @@ import FileTree from '../FileTree';
 function Sidebar() {
    const { importImages } = useLibrary();
   return (
-    <div className="flex flex-col bg-neutral-800 w-[290px] border-r border-neutral-700 h-full">
+    <div className="sidebar flex flex-col bg-neutral-800 w-[200px]  border-r border-neutral-700  overflow-hidden">
       <div
-        className="w-full h-16 flex items-center px-2 justify-end gap-1"
+        className="w-full h-17 flex items-center px-2 justify-end gap-1"
         data-tauri-drag-region
       >
         <Button size="icon" variant="ghost" onClick={() => importImages()}>
@@ -21,13 +21,13 @@ function Sidebar() {
         </Button>
       </div>
       {/* HEADER-SIDEBAR */}
-      <div className="px-2">
+      <div className="px-2 w-full">
         {/* Library Switching */}
         <LibrarySwitching />
       </div>
 
       {/* SIDEBAR BODY */}
-      <div className="mt-2.5 flex flex-col px-2.5">
+      <div className="mt-2.5 flex flex-col px-2.5 w-full">
         <Button
           variant="ghost"
           className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
@@ -58,7 +58,7 @@ function Sidebar() {
       </div>
 
       {/* FOLDERS SIDEBAR */}
-      <div className="mt-4  border-t/ border-neutral-700/   h-full overflow-y-auto scrollbar">
+      <div className="mt-4  border-t/ border-neutral-700/ w-full h-full overflow-y-auto scrollbar">
         <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 ">
           Folders
           <span className="text-[11px]">{`(3)`}</span>

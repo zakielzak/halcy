@@ -118,19 +118,16 @@ export default function FileTree() {
   }, [tree.getItems(), virtualizer]);
 
   return (
-    <div className="flex h-full flex-col gap-2 *:first:grow dark mt-1">
-      
-        <Tree indent={indent} tree={tree} >
-         
-            {tree.getItems().map((item) => {
-              return (
-                <TreeItem key={item.getId()} item={item} className="mr-2.5 ">
-                  <TreeItemLabel />
-                </TreeItem>
-              );
-            })}
-        </Tree>
-      
+    <div className="flex h-full w-full flex-col gap-2 *:first:grow dark mt-1">
+      <Tree indent={indent} tree={tree}>
+        {tree.getItems().map((item) => {
+          return (
+            <TreeItem key={item.getId()} item={item} className="mr-2.5 ">
+              <TreeItemLabel />
+            </TreeItem>
+          );
+        })}
+      </Tree>
     </div>
   );
 }

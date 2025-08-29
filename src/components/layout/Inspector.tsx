@@ -17,9 +17,9 @@ function Inspector() {
     const close = useCallback(async () => appWindow.close(), []);
 
   return (
-    <div className=" bg-neutral-800 w-[290px] flex flex-col">
+    <div className="inspector bg-neutral-800   w-[200px] flex flex-col overflow-hidden">
       <div
-        className="flex items-center justify-end  h-11 w-full  px-2"
+        className="flex items-center justify-end  h-12 w-full  px-2"
         data-tauri-drag-region
       >
         <Button
@@ -50,12 +50,12 @@ function Inspector() {
           <X size={16} strokeWidth={2} />
         </Button>
       </div>
-      <div className="flex flex-col mt-2 px-4 gap-3">
+      <div className="flex flex-col mt-1 px-4 gap-3">
         <Input />
         <Input />
       </div>
       <div className="px-4 mt-8">
-        <span className='text-xs font-bold'>Properties</span>
+        <span className="text-xs font-bold">Properties</span>
       </div>
     </div>
   );

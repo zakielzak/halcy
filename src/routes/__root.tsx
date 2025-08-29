@@ -16,18 +16,17 @@ function RootComponent() {
 
   return (
     <Fragment>
-      <main className="flex select-none antialiased /*bg-[#fafafc]*/ bg-gray-700 h-dvh w-dvw font-outfit overflow-hidden text-white">
+   
         {/* HEADER */}
         {/* <Header/> */}
 
-        <Sidebar/>
+        <Sidebar />
 
         {/* CONTENT */}
-        <Outlet/>
+        <Outlet />
 
-        <Inspector/>
-        
-      </main>
+        <Inspector />
+      
     </Fragment>
   );
 }

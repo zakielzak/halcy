@@ -124,11 +124,36 @@
 
 
 
+
 body {
   --sb-track-color: transparent;
   --sb-thumb-color: #383737;
   --sb-size: 4px;
 }
+
+.layout {
+ display: grid; 
+  grid-template-rows: auto 1fr; 
+  grid-template-columns: auto 1fr; 
+  grid-template-areas:
+    "sidebar main inspector"
+    "sidebar main inspector";
+}
+
+.sidebar {
+  grid-area: header;
+}
+
+.sidebar {
+  grid-area: sidebar;
+}
+.main {
+  grid-area: main;
+}
+.inspector {
+  grid-area: inspector;
+}
+
 
 
 
