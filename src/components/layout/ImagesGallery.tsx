@@ -19,22 +19,22 @@ interface ImageProps {
 })); */
 
 const ImageCard = ({
-  imagePath,
-  index,
-  height,
+  image,
   style,
 }: {
-  imagePath: string;
-  index: number;
-  height: number;
+  image: {
+    path: string;
+    width: number;
+    heigth: number;
+  }
   style: React.CSSProperties;
 }) => {
-  const imageUrl = convertFileSrc(imagePath);
+  const imageUrl = convertFileSrc(image.path);
   return (
     <div
       style={{
         ...style,
-        height: `${height}px`,
+      
         backgroundColor: "#3498db",
         display: "flex",
         alignItems: "center",
@@ -48,7 +48,7 @@ const ImageCard = ({
     >
       <img
         src={imageUrl}
-        alt={imagePath.split("/").pop() || ""}
+        alt={image.path.split("/").pop() || ""}
         className={cn(
           "object-cover w-full h-full transition-opacity duration-300"
         )}
@@ -61,10 +61,8 @@ const ImageCard = ({
 function ImagesGallery() {
   // VIRTUALIZER
   const { rootDir, handleLibrarySelect } = useLibrary();
-  const { images } = useImages(`${rootDir}/library.db`)
+  const { images, isLoading, isError } = useImages(`${rootDir}/library.db`)
   const [imagePaths, setImagePaths] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log(rootDir)
@@ -80,8 +78,7 @@ function ImagesGallery() {
         setImagePaths([]);
         return;
       }
-      setIsLoading(true);
-      setError(null);
+    
       try {
         const paths = await invoke<string[]>("scan_library_images", {
           libraryPath: rootDir,
@@ -89,11 +86,9 @@ function ImagesGallery() {
         setImagePaths(paths);
       } catch (e) {
         console.error("Error scanning library:", e);
-        setError("Could not load library. Please check permissions or path.");
+     
         setImagePaths([]);
-      } finally {
-        setIsLoading(false);
-      }
+      } 
     };
     scanLibrary();
   }, [rootDir]);
@@ -104,23 +99,31 @@ function ImagesGallery() {
   const gapX = 7;
   const numColumns = 4;
 
+
+    const listImages = images ?? [];
+      const columnWidth = 400;
+
   const virtualizer = useVirtualizer({
-    count: images.length,
+    count: listImages.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: (index) => images[index].height + gapY,
+    estimateSize: (index) => {
+      const aspectRatio = listImages[index].width / listImages[index].heigth;
+      const estimatedHeight = columnWidth / aspectRatio;
+      return estimatedHeight + gapY;
+    },
     overscan: 5,
     lanes: numColumns,
-    getItemKey: (index) => imagePaths[index],
+    getItemKey: (index) => listImages[index].path,
   });
 
   const virtualItems = virtualizer.getVirtualItems();
   return (
     <>
-      <div className="">Header</div>
+     
 
       <div
         ref={parentRef}
-        className="List h-full w-full relative overflow-y-auto pr-6 pl-4"
+        className="List h-full w-full relative overflow-y-auto pr-6 pl-4 scrollbar"
       >
         <div
           style={{
@@ -129,26 +132,28 @@ function ImagesGallery() {
           className="w-full relative "
         >
           {virtualItems.map((virtualItem) => {
-            const item = images[virtualItem.index];
-            const imagePath = imagePaths[virtualItem.index] ?? "";
+            const item = listImages[virtualItem.index];
+            
+              const aspectRatio = item.width / item.heigth;
+              const calculatedHeight = `calc(${100 / numColumns}vw / ${aspectRatio} - ${gapX}px)`;
 
-            return (
-              <ImageCard
-                key={virtualItem.key}
-                imagePath={imagePath}
-                index={virtualItem.index}
-                height={item.height}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: `calc(${(100 / numColumns) * virtualItem.lane}% + ${
-                    virtualItem.lane * gapX
-                  }px)`,
-                  width: `calc(${100 / numColumns}% - ${gapX}px)`,
-                  transform: `translateY(${virtualItem.start}px)`,
-                }}
-              />
-            );
+            
+          return (
+            <ImageCard
+              key={virtualItem.key}
+              image={item}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: `calc(${(100 / numColumns) * virtualItem.lane}% + ${
+                  virtualItem.lane * gapX
+                }px)`,
+                width: `calc(${100 / numColumns}% - ${gapX}px)`,
+                transform: `translateY(${virtualItem.start}px)`,
+                height: calculatedHeight, // Pass the calculated height to the component
+              }}
+            />
+          );
           })}
           {/*   {virtualItems.map((virtualItem) => {
               const imagePath = imagePaths[virtualItem.index];

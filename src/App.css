@@ -128,7 +128,7 @@
   grid-template-rows: auto 1fr; 
   grid-template-columns: auto 1fr; 
   grid-template-areas:
-    "header header header"
+    "sidebar main inspector"
     "sidebar main inspector"
     "sidebar main inspector";
 }
@@ -148,15 +148,31 @@
 }
 
 
-
-.ListItemEven,
-.ListItemOdd {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: red;
+body {
+  --sb-track-color: transparent;
+  --sb-thumb-color: #383737;
+  --sb-size: 4px;
 }
 
-.ListItemEven {
-  background-color: #e6e4dc;
+
+
+.scrollbar::-webkit-scrollbar {
+  width: var(--sb-size);
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: var(--sb-track-color);
+  border-radius: 3px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb-color);
+  border-radius: 3px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .scrollbar {
+      scrollbar-color: var(--sb-thumb-color)
+                     var(--sb-track-color);
+  }
 }

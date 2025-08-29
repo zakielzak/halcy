@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useSetting } from "./useSettings";
 import { open} from "@tauri-apps/plugin-dialog";
 import { getLibraryName } from "@/lib/utils";
-import { getDb, ImageRecord, insertImage, insertImages } from "@/lib/db";
+import { getDb, ImageRecord,  insertImages } from "@/lib/db";
 
 
 
@@ -53,16 +53,6 @@ export function useLibrary() {
 
           // Run and apply migrations to selected library database 
           await invoke("run_migrations", { dbPath: returnedDbPath });
-       /*  
-          const testImage = {
-            filename: "test_image.jpg",
-            path: "C:\\images\\test_image.jpg",
-            width: "1920",
-            heigth: "1080",
-          };
-
-          await insertImage(returnedDbPath, testImage) */
-
           
           console.log(
             "New library created, migrations applied."
@@ -102,26 +92,16 @@ export function useLibrary() {
 
     if (selectedDirectory) {
       try {
-        const importedPaths = await invoke<string[]>("import_images", {
+        const importedImagesData = await invoke<Omit<ImageRecord, 'id'>[]>("import_images", {
           sourceDir: selectedDirectory as string,
           destDir: rootDir,
         });
 
-        const imagesToInsert: Omit<ImageRecord, "id">[] = importedPaths.map(
-          (path) => {
-            return {
-              filename: path.split("/").pop() || "",
-              path: path,
-              width: "1920",
-              heigth: "1080",
-            };
-          }
-        );
-
-        if (imagesToInsert.length > 0) {
-          await insertImages(`${rootDir}/library.db`, imagesToInsert);
+        console.log(importedImagesData)
+        if (importedImagesData.length > 0) {
+          await insertImages(`${rootDir}/library.db`, importedImagesData);
           console.log(
-            `Successfully imported and inserted ${imagesToInsert.length} images.`
+            `Successfully imported and inserted ${importedImagesData.length} images.`
           );
         } else {
           console.log("No images were imported.");

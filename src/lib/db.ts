@@ -8,8 +8,8 @@ export interface ImageRecord {
   //size: number;
   //btime: number;
   //mtime: number;
-  width: string;
-  heigth: string;
+  width: number;
+  heigth: number;
   //ext: string;
   //description: string;
   //url_origin: string;

@@ -26,18 +26,18 @@ function LibrarySwitching() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild className="mt-7 ">
+      <PopoverTrigger asChild className=" ">
         <Button
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className=" z-40 px-1.5 py-2 h-auto  overflow-hidden justify-start hover:bg-white/8 w-full gap-1 hover:text-white text-sm font-semibold"
+          className=" z-40 px-1.5 py-1.5 h-auto overflow-hidden justify-start hover:bg-white/8 w-full gap-[7px] hover:text-white text-sm font-semibold"
         >
           <div className="size-5 rounded-sm bg-amber-300 z-40 "></div>
           <p className="truncate">
             {currentLibraryName || "No library selected"}
           </p>
-          <ChevronsUpDown size={13} className="ml-auto" />
+          <ChevronsUpDown size={16} className="ml-auto" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[400px] p-0 dark" side="right" align="start">

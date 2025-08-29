@@ -5,15 +5,25 @@ use std::{
 
 use tauri_plugin_sql::{Builder, Migration, MigrationKind};
 
+use serde::{Serialize, Deserialize};
 use sqlx::{
     migrate,
     sqlite::SqlitePool
 };
 
 use rayon::prelude::*;
-use tauri::AppHandle;
+use tauri::{image::Image, AppHandle};
 use tauri_plugin_fs::FsExt;
 use walkdir::{WalkDir, DirEntry as WalkDirEntry};
+use image::ImageReader;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ImageImportData {
+    pub path: String,
+    pub filename: String, 
+    pub width: u32,
+    pub heigth: u32,
+}
 
 fn get_image_files(dir: &str) -> impl ParallelIterator<Item = WalkDirEntry> {
     let valid_extensions = vec!["jpg", "jpeg", "png", "gif", "jfif", "webp"];
@@ -50,20 +60,35 @@ fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
 //---
 
 #[tauri::command]
-fn import_images(source_dir: String, dest_dir: String) -> Result<Vec<String>, String> {
+fn import_images(source_dir: String, dest_dir: String) -> Result<Vec<ImageImportData>, String> {
     let dest_path = Path::new(&dest_dir).join("images");
 
     if !dest_path.exists() {
         return Err("Destination directory does not exist.".to_string());
     }
 
-    let imported_paths: Vec<String> = get_image_files(&source_dir)
+    let imported_data: Vec<ImageImportData> = get_image_files(&source_dir)
         .filter_map(|entry| {
             let file_name = entry.path().file_name().unwrap();
             let dest_file = dest_path.join(file_name);
 
+            // Intenta copiar el archivo y obtener sus dimensiones.
             match fs::copy(entry.path(), &dest_file) {
-                Ok(_) => Some(dest_file.to_string_lossy().to_string()),
+                Ok(_) => {
+                    if let Ok(reader) = ImageReader::open(&dest_file) {
+                        if let Ok(image) = reader.into_dimensions() {
+                            let (width, heigth) = image;
+                            return Some(ImageImportData {
+                                path: dest_file.to_string_lossy().to_string(),
+                                filename: file_name.to_string_lossy().to_string(),
+                                width,
+                                heigth,
+                            });
+                        }
+                    }
+                    // Si falla la lectura, devuelve un valor nulo.
+                    None
+                },
                 Err(e) => {
                     eprintln!("Failed to copy file {:?}: {}", entry.path(), e);
                     None
@@ -72,7 +97,7 @@ fn import_images(source_dir: String, dest_dir: String) -> Result<Vec<String>, St
         })
         .collect();
 
-    Ok(imported_paths)
+    Ok(imported_data)
 }
 
 /* 

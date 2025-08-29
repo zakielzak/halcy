@@ -8,17 +8,8 @@ import { useLibrary } from '@/hooks/useLibrary';
 function Header() {
 
     const { importImages } = useLibrary();
-
     
-    const appWindow = getCurrentWindow();
-
-    const minimize = useCallback(async () => appWindow.minimize(), []);
-    const toggleMaximize = useCallback(
-      async () => appWindow.toggleMaximize(),
-      []
-    );
-    const close = useCallback(async () => appWindow.close(), []);
-
+  
   return (
     <div
       className="header absolute top-0 left-0 right-0 h-8 z-20 w-full flex items-center "
