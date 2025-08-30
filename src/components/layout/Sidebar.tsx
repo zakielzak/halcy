@@ -1,5 +1,5 @@
 import LibrarySwitching from '../LibrarySwitching';
-import { Inbox, Plus, Shuffle, SidebarIcon, Tag } from 'lucide-react';
+import { FileClock, Inbox, Plus, Shuffle, SidebarIcon, Tag, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLibrary } from '@/hooks/useLibrary';
 import FileTree from '../FileTree';
@@ -8,9 +8,9 @@ import FileTree from '../FileTree';
 function Sidebar() {
    const { importImages } = useLibrary();
   return (
-    <div className="sidebar flex flex-col bg-neutral-800 w-[200px]  border-r border-neutral-700  overflow-hidden">
+    <div className="sidebar flex flex-col bg-[#1f2023] w-[200px]  border-r border-[#313134]  overflow-hidden">
       <div
-        className="w-full h-17 flex items-center px-2 justify-end gap-1"
+        className="w-full h-22.5 flex items-center px-2 justify-end gap-1"
         data-tauri-drag-region
       >
         <Button size="icon" variant="ghost" onClick={() => importImages()}>
@@ -42,6 +42,65 @@ function Sidebar() {
           variant="ghost"
           className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="icon icon-tabler icons-tabler-outline icon-tabler-folder-question"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 19h-10a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v2.5" />
+            <path d="M19 22v.01" />
+            <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+          </svg>
+          <span>Uncategorized</span>
+          <span className="ml-auto text-[10px] tracking-wider text-white/60">
+            2
+          </span>
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="icon icon-tabler icons-tabler-outline icon-tabler-bookmark-question"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 19l-3 -2l-6 4v-14a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v4" />
+            <path d="M19 22v.01" />
+            <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+          </svg>
+          <span>Untagged</span>
+          <span className="ml-auto text-[10px] tracking-wider text-white/60">
+            2
+          </span>
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto justify-start"
+        >
+          <FileClock size={16} />
+          <span>Recently Used</span>
+        </Button>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
+        >
           <Tag size={16} />
           <span>All Tags</span>
           <span className="ml-auto text-[10px] tracking-wider text-white/60">
@@ -55,13 +114,27 @@ function Sidebar() {
           <Shuffle size={16} />
           <span>Random</span>
         </Button>
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto "
+        >
+          <Trash2 size={16} />
+          <span>Trash</span>
+          <span className="ml-auto text-[10px] tracking-wider text-white/60">
+            3
+          </span>
+        </Button>
       </div>
 
       {/* FOLDERS SIDEBAR */}
-      <div className="mt-4  border-t/ border-neutral-700/ w-full h-full overflow-y-auto scrollbar">
-        <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 ">
-          Folders
+      <div className="pt-2 mt-2  border-t/ border-neutral-700/ w-full h-full overflow-y-auto scrollbar">
+        <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 mb-2.5 ">
+          Smart Folders
           <span className="text-[11px]">{`(3)`}</span>
+        </div>
+        <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 mb-2">
+          Folders
+          <span className="text-[11px]">{`(26)`}</span>
         </div>
 
         <FileTree />

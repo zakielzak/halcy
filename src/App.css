@@ -128,7 +128,7 @@
 body {
   --sb-track-color: transparent;
   --sb-thumb-color: #383737;
-  --sb-size: 4px;
+  --sb-size: 2px;
 }
 
 .layout {

@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   return (
-    <div className="main flex flex-col bg-neutral-900  ">
+    <div className="main flex flex-col bg-[#18191c]  ">
       <div
         className="px-3.5 h-15 flex gap-1 items-center justify-between "
         data-tauri-drag-region
@@ -52,7 +52,7 @@ function RouteComponent() {
               <Filter size={16} />
             </Button>
           </div>
-          <Input className="h-7" />
+          <Input className="h-7 placeholder:font-medium placeholder:text-xs" placeholder='Search' />
         </div>
       </div>
 

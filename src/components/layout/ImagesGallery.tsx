@@ -2,7 +2,8 @@ import { useImages } from "@/hooks/useImages";
 import { useLibrary } from "@/hooks/useLibrary";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 // The ImageCard component doesn't need to change much, but we'll simplify it slightly.
 const ImageCard = ({
@@ -22,10 +23,13 @@ const ImageCard = ({
       style={style}
       className=" rounded-md shadow-lg overflow-hidden flex items-center justify-center"
     >
-      <img
+      <LazyLoadImage
         src={imageUrl}
         alt={image.path.split("/").pop() || ""}
-        className="w-full h-full object-cover transition-opacity duration-300"
+        className="w-full h-full object-fill transition-opacity duration-300"
+       
+        width={image.width}
+        height={image.heigth}
       />
     </div>
   );
@@ -41,26 +45,25 @@ function ImagesGallery() {
 
   const gap = 13;
   const gapX = 0;
-  const listImages = images ?? [];
-
-  // Use a ResizeObserver to get the container's width dynamically
+  const listImages = useMemo(() => images ?? [], [images]);
+  // Observer para obtener el ancho del contenedor de forma reactiva
   useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      if (entries[0]) {
-        setContainerWidth(entries[0].contentRect.width);
-      }
-    });
-
+    let observer: ResizeObserver;
     if (parentRef.current) {
+      observer = new ResizeObserver((entries) => {
+        if (entries[0]) {
+          const width = entries[0].contentRect.width;
+          setContainerWidth(width);
+        }
+      });
       observer.observe(parentRef.current);
     }
-
     return () => {
-      if (parentRef.current) {
-        observer.unobserve(parentRef.current);
+      if (observer) {
+        observer.disconnect();
       }
     };
-  }, [parentRef]);
+  }, []);
 
   // The virtualizer's estimateSize function must use the containerWidth
   const virtualizer = useVirtualizer({
@@ -85,7 +88,7 @@ function ImagesGallery() {
   return (
     <div
       ref={parentRef}
-      className="h-full w-full relative overflow-y-auto pr-9 pl-4 scrollbar"
+      className="h-full w-full relative overflow-y-auto pr-9 pl-4 scrollbar scroll-smooth"
     >
       <div
         style={{

@@ -31,7 +31,7 @@ function LibrarySwitching() {
           variant="ghost"
           role="combobox"
           aria-expanded={open}
-          className=" z-40 px-1 py-1.5 h-auto overflow-hidden justify-start hover:bg-white/8 w-full gap-[7px] hover:text-white text-sm font-semibold"
+          className=" z-40 px-1.5 py-1.5 h-auto overflow-hidden justify-start hover:bg-white/8 w-full gap-[7px] hover:text-white text-sm font-semibold"
         >
           <div className="size-5 rounded-sm bg-amber-300 z-40 "></div>
           <p className="truncate">
