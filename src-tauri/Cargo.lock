@@ -1719,6 +1719,7 @@ dependencies = [
  "tauri-plugin-sql",
  "tauri-plugin-store",
  "tokio",
+ "uuid",
  "walkdir",
 ]
 
