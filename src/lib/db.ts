@@ -21,6 +21,7 @@ export interface FolderRecord {
   id: string;
   name: string;
   parent_id: string | null;
+  description: string | null;
  /*  imported_date: string;
   modification_date: string;
  */
@@ -29,6 +30,7 @@ export interface FolderRecord {
 
 export async function getDb(dbPath: string): Promise<Database> {
   try {
+    console.log("Valor actual en getDB:", dbPath)
     const db = await Database.load(`sqlite:${dbPath}`);
     return db;
   } catch (e) {
@@ -37,9 +39,24 @@ export async function getDb(dbPath: string): Promise<Database> {
   }
 }
 
+export async function fetchFoldersFromDb(
+  dbPath: string
+): Promise<FolderRecord[]> {
+  const db = await getDb(dbPath);
+  try {
+    const folders = await db.select<FolderRecord[]>("SELECT * FROM folders");
+    return folders;
+  } catch (e) {
+    console.error("Error fetching folders from the database:", e);
+    return [];
+  }
+}
+
+
 export async function fetchAllImages(dbPath: string): Promise<ImageRecord[]> {
   const db = await getDb(dbPath);
   try {
+    console.log("Esto siempre sucede de manera correcta")
     const images = await db.select<ImageRecord[]>("SELECT * FROM images");
     return images;
   } catch (e) {

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS images (
    filename TEXT NOT NULL,
    path TEXT NOT NULL,
    width TEXT NOT NULL,
-   heigth TEXT NOT NULL
+   height TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS folder_images (

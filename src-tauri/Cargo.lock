@@ -1706,6 +1706,7 @@ dependencies = [
 name = "halcy"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "image",
  "rayon",
  "serde",
@@ -5153,7 +5154,6 @@ dependencies = [
  "io-uring",
  "libc",
  "mio",
- "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "slab",

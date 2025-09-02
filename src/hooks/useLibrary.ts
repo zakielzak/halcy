@@ -9,12 +9,45 @@ import { FolderImportData, LibraryImportResult } from "@/types";
 
 export function useLibrary() {
   const [rootDir, setRootDir] = useSetting("rootDir", "");
-  const [libraryHistory, setLibraryHistory, updateLibraryHistory] = useSetting(
+  const [history, setHistory, updateHistory] = useSetting(
     "libraryHistory",
-    []
+    []  
   );
 
+  const handleLibrarySelect = async (path: string) => {
+    if (path === rootDir) return;
+    setRootDir(path);
+    if (updateHistory) {
+      await updateHistory((prev) => [path, ...prev.filter((p) => p !== path)]);
+    }
+  };
 
+   const createNewLibrary = async () => {
+     const name = prompt("Library name:");
+     if (!name) return;
+
+     const dir = await open({ directory: true, multiple: false });
+     if (!dir) return;
+
+     const path = `${dir}/${name}.library`;
+
+     try {
+        const dbPath = await invoke<string>("create_library", {
+          libraryPath: path,
+        });
+
+        console.log("el dbPath devuelto:", dbPath)
+        await getDb(dbPath);
+        await invoke("run_migrations", { dbPath });
+        handleLibrarySelect(path);
+      
+     } catch (e) {
+      console.error("Error creating library:", e)
+     }
+   
+   };
+
+/* 
   const handleLibrarySelect = async (path: string) => {
     // Check if the path is different to avoid unnecesary writes
     if (path !== rootDir) {
@@ -28,8 +61,8 @@ export function useLibrary() {
         });
       }
     }
-  };
-
+  }; */
+/* 
   const createNewLibrary = async () => {
     // TODO: Use custom dialog from frontend
     const libraryName = prompt("Please enter a name for your new library:");
@@ -47,6 +80,8 @@ export function useLibrary() {
 
       try {
         const returnedDbPath = await invoke("create_library", { libraryPath: newLibraryPath });
+
+        console.log("El nuevo directorio devuelto:", returnedDbPath)
 
         if (typeof returnedDbPath === "string") {
    
@@ -67,12 +102,12 @@ export function useLibrary() {
         console.error("Failed to create a new library", e);
       }
     }
-  };
+  }; */
 
   const removeLibrary = async (pathToRemove: string) => {
-    if (libraryHistory) {
-      const newHistory = libraryHistory.filter((p) => p !== pathToRemove);
-      await setLibraryHistory(newHistory);
+    if (history) {
+      const newHistory = history.filter((p) => p !== pathToRemove);
+      await setHistory(newHistory);
 
       if (rootDir === pathToRemove) {
         await setRootDir(newHistory[0] || "");
@@ -170,7 +205,7 @@ export function useLibrary() {
   return {
     //UI Friendly
     rootDir,
-    libraryHistory,
+    history,
     currentLibraryName,
     // Logic
     importImages,

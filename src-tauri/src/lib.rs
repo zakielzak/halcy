@@ -3,6 +3,9 @@ use std::{
 };
 use uuid::Uuid;
 
+mod io;
+mod commands;
+
 use tauri_plugin_sql::{Builder, Migration, MigrationKind};
 
 use serde::{Serialize, Deserialize};
@@ -269,7 +272,7 @@ fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
     Ok(image_paths)
 } */
 
-#[tauri::command]
+/* #[tauri::command]
 fn create_library(app: AppHandle, library_path: String) -> Result<String, String> {
     let path = Path::new(&library_path);
 
@@ -295,7 +298,7 @@ fn create_library(app: AppHandle, library_path: String) -> Result<String, String
 
     Ok(db_path.to_string_lossy().to_string().replace("\\", "/"))
 }
-
+ */
 #[tauri::command]
 async fn run_migrations(db_path: String) -> Result<(), String> {
     // 1. Create a connection pool for the dynamic database path.
@@ -347,7 +350,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            create_library,
+            commands::create_library,
             import_images,
             scan_library_images,
             run_migrations

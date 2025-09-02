@@ -4,12 +4,15 @@ import { useTree } from "@headless-tree/react";
 
 import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { useFolders } from "@/hooks/useFolders";
+import { useLibrary } from "@/hooks/useLibrary";
 
 interface Item {
   name: string;
   children?: string[];
 }
 
+// DAToS DE EJEMPLO
 const items: Record<string, Item> = {
   company: {
     name: "Company",
@@ -86,9 +89,66 @@ const generateTreeData = (count: number): Record<string, any> => {
   return data;
 };
 export default function FileTree() {
-  const [nodes] = useState(() => generateTreeData(600));
+  const { rootDir } = useLibrary();
+  const {
+    data: treeData,
+    isLoading,
+    isError,
+    error,
+  } = useFolders(`${rootDir}/library.db`);
   const parentRef = useRef<HTMLDivElement>(null);
 
+  // All hooks must be called here, at the top-level of the function component, unconditionally.
+  const rootItemId = useMemo(() => {
+    if (!treeData) return "root";
+    const rootFolder = Object.values(treeData).find(
+      (folder) => folder.parent_id === null
+    );
+    return rootFolder?.id || "root";
+  }, [treeData]);
+
+  const tree = useTree({
+    // These hooks are called regardless of the data's state.
+    rootItemId,
+    dataLoader: {
+      getItem: (itemId) => treeData?.[itemId],
+      getChildren: (itemId) => treeData?.[itemId]?.children || [],
+    },
+    getItemName: (item) => item.getItemData()?.name || "",
+    isItemFolder: () => true,
+    features: [syncDataLoaderFeature, hotkeysCoreFeature],
+  });
+
+  const virtualizer = useVirtualizer({
+    count: tree.getItems().length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 32,
+    overscan: 5,
+  });
+
+  useEffect(() => {
+    virtualizer.measure();
+  }, [tree.getItems(), virtualizer]);
+
+  // Now, you can perform your conditional rendering based on the hook states.
+  if (isLoading) {
+    return <div className="p-4 text-center">Cargando carpetas...</div>;
+  }
+
+  if (isError) {
+    console.error(error);
+    return (
+      <div className="p-4 text-center text-red-500">
+        Error al cargar carpetas.
+      </div>
+    );
+  }
+
+  // This check is the key. It's now separate from the hook calls.
+  if (!treeData || Object.keys(treeData).length === 0) {
+    return <div className="p-4 text-center">No hay carpetas para mostrar.</div>;
+  }
+  /* 
   const tree = useTree({
     rootItemId: "root",
     dataLoader: {
@@ -99,23 +159,7 @@ export default function FileTree() {
     isItemFolder: () => true,
     features: [syncDataLoaderFeature, hotkeysCoreFeature],
   });
-
-
-  
-  const virtualizer = useVirtualizer({
-    count: tree.getItems().length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 32, // 
-    overscan: 5,
-  });
-
-  const virtualItems = virtualizer.getVirtualItems();
-
-  useEffect(() => {
-    // Es crucial volver a medir el tamaño del virtualizer cuando la estructura del árbol cambia
-    // (por ejemplo, al expandir o contraer una carpeta).
-    virtualizer.measure();
-  }, [tree.getItems(), virtualizer]);
+ */
 
   return (
     <div className="flex h-full w-full flex-col gap-2 *:first:grow dark mt-1">

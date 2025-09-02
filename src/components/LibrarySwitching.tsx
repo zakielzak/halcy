@@ -22,7 +22,7 @@ function LibrarySwitching() {
 
   const [open, setOpen] = useState(false);
 
-  const { rootDir , libraryHistory, currentLibraryName, handleLibrarySelect, createNewLibrary, removeLibrary} = useLibrary()
+  const { rootDir , history, currentLibraryName, handleLibrarySelect, createNewLibrary, removeLibrary} = useLibrary()
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -46,7 +46,7 @@ function LibrarySwitching() {
           <CommandList>
             <CommandEmpty>No library found.</CommandEmpty>
             <CommandGroup heading="Recent Libraries">
-              {libraryHistory?.map((libPath) => (
+              {history?.map((libPath) => (
                 <CommandItem
                   key={libPath}
                   value={libPath}

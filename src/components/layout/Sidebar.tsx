@@ -95,7 +95,7 @@ function Sidebar() {
           className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto justify-start"
         >
           <FileClock size={16} />
-          <span>Recently Used</span>
+          <span>Recently Useds</span>
         </Button>
         <Button
           variant="ghost"

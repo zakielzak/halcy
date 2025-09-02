@@ -13,6 +13,7 @@ export interface FolderImportData {
   path: string;
   name: string;
   parent_id: string | null;
+  description: string | null;
 }
 
 export interface LibraryImportResult {
