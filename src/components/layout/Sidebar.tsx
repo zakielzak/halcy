@@ -137,7 +137,7 @@ function Sidebar() {
           <span className="text-[11px]">{`(26)`}</span>
         </div>
 
-        <FileTree />
+        {/* <FileTree /> */}
       </div>
     </div>
   );

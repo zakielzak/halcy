@@ -1,5 +1,6 @@
 import { useImages } from "@/hooks/useImages";
 import { useLibrary } from "@/hooks/useLibrary";
+import { useSetting } from "@/hooks/useSettings";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -36,7 +37,10 @@ const ImageCard = ({
 };
 
 function ImagesGallery() {
-  const { rootDir } = useLibrary();
+ /*  const { rootDir } = useLibrary(); */
+
+   const [rootDir, setRootDir] = useSetting("rootDir", "");
+
   const { images } = useImages(`${rootDir}/library.db`);
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -72,7 +76,7 @@ function ImagesGallery() {
     estimateSize: (index) => {
       if (containerWidth === 0) return 300; // Return a placeholder until width is known
       const image = listImages[index];
-      const aspectRatio = image.width / image.heigth;
+      const aspectRatio = image.width / image.height;
       const columnWidth =
         (containerWidth - (numColumns - 1) * gap) / numColumns;
       const estimatedHeight = columnWidth / aspectRatio;
@@ -100,7 +104,7 @@ function ImagesGallery() {
         {virtualItems.map((virtualItem) => {
           const item = listImages[virtualItem.index];
 
-          const aspectRatio = item.width / item.heigth;
+          const aspectRatio = item.width / item.height;
           const calculatedHeight = virtualItem.size - gap; // Height calculated by the virtualizer
 
           return (

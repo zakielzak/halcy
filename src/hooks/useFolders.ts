@@ -20,15 +20,15 @@ const transformFoldersToTree = (
       id: folder.id,
       name: folder.name,
       children: [],
-      parent_id: folder.parent_id || null,
+      parent_id: folder.parentId || null,
       description: "a"
     };
   });
 
   // Pass 2: Build parent-child relationships
   folders.forEach((folder) => {
-    if (folder.parent_id && nodes[folder.parent_id]) {
-      nodes[folder.parent_id].children.push(folder.id);
+    if (folder.parentId && nodes[folder.parentId]) {
+      nodes[folder.parentId].children.push(folder.id);
     }
   });
 

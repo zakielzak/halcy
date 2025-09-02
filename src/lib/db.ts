@@ -21,18 +21,23 @@ export interface FolderRecord {
   id: string;
   name: string;
   parentId: string | null;
-/*   description: string | null; */
- /*  imported_date: string;
+  /*   description: string | null; */
+  /*  imported_date: string;
   modification_date: string;
  */
 }
 
-let db: Database | null = null;
+const pools = new Map<string, Database>();
 
-export async function getDb(dbPath: string): Promise<Database> {
+export async function connect(dbPath: string): Promise<Database> {
   try {
-    console.log("Valor actual en getDB:", dbPath)
-    db = await Database.load(`sqlite:${dbPath}`);
+    let db = pools.get(dbPath);
+    if (!db) {
+      db = await Database.load(`sqlite:${dbPath}`);
+      await db.execute("PRAGMA journal_mode=WAL");
+      await db.execute("PRAGMA synchronous=NORMAL");
+      pools.set(dbPath, db);
+    }
     return db;
   } catch (e) {
     console.error("Failed to connect to the database:", e);
@@ -40,168 +45,50 @@ export async function getDb(dbPath: string): Promise<Database> {
   }
 }
 
-export async function fetchFoldersFromDb(
-  dbPath: string
-): Promise<FolderRecord[]> {
-  const db = await getDb(dbPath);
-  try {
-    const folders = await db.select<FolderRecord[]>("SELECT * FROM folders");
-    return folders;
-  } catch (e) {
-    console.error("Error fetching folders from the database:", e);
-    return [];
-  }
-}
+export const fetchFoldersFromDb = (path: string) =>
+  connect(path).then((db) =>
+    db.select<FolderRecord[]>("SELECT * FROM folders")
+  );
 
+export const fetchAllImages = (path: string) =>
+  connect(path).then((db) => db.select<ImageRecord[]>("SELECT * FROM images"));
 
-export async function fetchAllImages(dbPath: string): Promise<ImageRecord[]> {
-  const db = await getDb(dbPath);
-  try {
-    console.log("Esto siempre sucede de manera correcta")
-    const images = await db.select<ImageRecord[]>("SELECT * FROM images");
-    return images;
-  } catch (e) {
-    console.error("Error fetching images from the database:", e);
-    return [];
-  }
-}
-
-export async function insertImages(
+export const insertImages = async (
   path: string,
   rows: ImageRecord[]
-): Promise<void> {
+): Promise<void> => {
   if (!rows.length) return;
-  const db = await getDb(path);
+  const db = await connect(path);
+  const sql = `INSERT INTO images(id, filename, path, width, height)
+               VALUES ${Array(rows.length).fill("(?,?,?,?,?)").join(",")}`;
+  const params: any[] = [];
+  for (const r of rows)
+    params.push(r.id, r.filename, r.path, r.width, r.height);
+  await db.execute(sql, params);
+};
 
-  const sql = `INSERT INTO images (id, filename, path, width, height)
-               VALUES ${rows.map(() => "(?,?,?,?,?)").join(",")}`;
-  await db.execute(sql, rows.flatMap((img) => [
-          img.id,
-          img.filename,
-          img.path,
-          img.width,
-          img.height,
-        ]));
-}
+export const insertFolders = async (
+  path: string,
+  rows: FolderRecord[]
+): Promise<void> => {
+  if (!rows.length) return;
+  const db = await connect(path);
+  const sql = `INSERT INTO folders(id, name, parent_id)
+               VALUES ${Array(rows.length).fill("(?,?,?)").join(",")}`;
+  const params: any[] = [];
+  for (const r of rows) params.push(r.id, r.name, r.parentId);
+  await db.execute(sql, params);
+};
 
-/* export async function insertImages(
-  dbPath: string,
-  imagesData: ImageRecord[]
-): Promise<void> {
-  if (imagesData.length === 0) {
-    console.log("No images to insert.");
-    return;
-  }
-
-  const db = await getDb(dbPath);
-  try {
-    const placeholders = imagesData.map(() => "(?, ?, ?, ?, ?)").join(",");
-
-    const sql = `
-            INSERT INTO images (id, filename, path, width, heigth)
-            VALUES ${placeholders}
-        `;
-
-    // Flatten the array of image data into a single array of parameters
-    const params = imagesData.flatMap((img) => [
-      img.id,
-      img.filename,
-      img.path,
-      img.width,
-      img.heigth,
-    ]);
-
-    await db.execute(sql, params);
-
-    console.log(`Successfully inserted ${imagesData.length} images.`);
-  } catch (e) {
-    console.error("Error inserting image into the database:", e);
-    throw new Error("Failed to insert image.");
-  }
-} */
-
-  export async function insertFolders(
-    path: string,
-    rows: FolderRecord[]
-  ): Promise<void> {
-    if (!rows.length) return;
-    const db = await getDb(path);
-    const sql = `INSERT INTO folders (id, name, parent_id) VALUES ${rows.map(() => "(?,?,?)").join(",")}`;
-    await db.execute(
-      sql,
-      rows.flatMap((f) => [f.id, f.name, f.parentId])
-    );
-  }
-
-  /* 
-export async function insertFolders(
-  dbPath: string,
-  foldersData: FolderRecord[]
-): Promise<void> {
-  if (foldersData.length === 0) return;
-
-  const db = await getDb(dbPath);
-  try {
-    // 1. Sort folders to ensure parent nodes are processed first.
-    const sortedFolders = foldersData.sort((a, b) => {
-      const aIsRoot = a.parent_id === null;
-      const bIsRoot = b.parent_id === null;
-      if (aIsRoot && !bIsRoot) return -1;
-      if (!aIsRoot && bIsRoot) return 1;
-      return 0;
-    });
-
-    const placeholders = sortedFolders.map(() => "(?, ?, ?)");
-    const sql = `
-      INSERT INTO folders (id, name, parent_id)
-      VALUES ${placeholders.join(", ")}
-    `;
-
-    const params = sortedFolders.flatMap((folder) => [
-      folder.id,
-      folder.name,
-      folder.parent_id === null ? null : folder.parent_id,
-    ]);
-
-    await db.execute(sql, params);
-  } catch (e) {
-    console.error("Error inserting folders:", e);
-    throw new Error("Failed to insert folders.");
-  }
-} *//* 
-export async function linkImagesToFolders(
-  dbPath: string,
-  links: { folder_id: string; image_id: string }[]
-): Promise<void> {
-  if (links.length === 0) return;
-  const db = await getDb(dbPath);
-  try {
-    const placeholders = links.map(() => "(?, ?)").join(",");
-    const sql = `
-            INSERT INTO folder_images (folder_id, image_id)
-            VALUES ${placeholders}
-        `;
-    const params = links.flatMap((link) => [link.folder_id, link.image_id]);
-    await db.execute(sql, params);
-  } catch (e) {
-    console.error("Error linking images to folders:", e);
-    throw new Error("Failed to link images to folders.");
-  }
-} */
-
-  
-export async function linkImagesToFolders(
+export const linkImagesToFolders = async (
   path: string,
   links: { folder_id: string; image_id: string }[]
-): Promise<void> {
+): Promise<void> => {
   if (!links.length) return;
-  const db = await getDb(path);
-  const sql = `INSERT INTO folder_images (folder_id, image_id) VALUES ${links.map(() => "(?,?)").join(",")}`;
-  await db.execute(sql, links.flatMap((l) => [
-    l.folder_id,
-    l.image_id
-  ]
-
-  ));
-}
-
+  const db = await connect(path);
+  const sql = `INSERT INTO folder_images(folder_id, image_id)
+               VALUES ${Array(links.length).fill("(?,?)").join(",")}`;
+  const params: any[] = [];
+  for (const l of links) params.push(l.folder_id, l.image_id);
+  await db.execute(sql, params);
+};
