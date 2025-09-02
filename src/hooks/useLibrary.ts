@@ -9,109 +9,51 @@ import { FolderImportData, LibraryImportResult } from "@/types";
 
 export function useLibrary() {
   const [rootDir, setRootDir] = useSetting("rootDir", "");
-  const [history, setHistory, updateHistory] = useSetting(
-    "libraryHistory",
-    []  
-  );
+  const [history, setHistory, updateHistory] = useSetting("libraryHistory", []);
 
-  const handleLibrarySelect = async (path: string) => {
+  const selectLibrary = async (path: string) => {
     if (path === rootDir) return;
-    setRootDir(path);
+
+    await setRootDir(path);
     if (updateHistory) {
-      await updateHistory((prev) => [path, ...prev.filter((p) => p !== path)]);
+      await updateHistory((prev) => {
+        const history = prev as string[];
+        return [path, ...history.filter((p) => p !== path)];
+      });
     }
   };
 
-   const createNewLibrary = async () => {
-     const name = prompt("Library name:");
-     if (!name) return;
-
-     const dir = await open({ directory: true, multiple: false });
-     if (!dir) return;
-
-     const path = `${dir}/${name}.library`;
-
-     try {
-        const dbPath = await invoke<string>("create_library", {
-          libraryPath: path,
-        });
-
-        console.log("el dbPath devuelto:", dbPath)
-        await getDb(dbPath);
-        await invoke("run_migrations", { dbPath });
-        handleLibrarySelect(path);
-      
-     } catch (e) {
-      console.error("Error creating library:", e)
-     }
-   
-   };
-
-/* 
-  const handleLibrarySelect = async (path: string) => {
-    // Check if the path is different to avoid unnecesary writes
-    if (path !== rootDir) {
-      await setRootDir(path);
-
-      // Add selected path to the top of the history
-      if (updateLibraryHistory) {
-        await updateLibraryHistory((currentHistory) => {
-          const filteredHistory = currentHistory.filter((p) => p !== path);
-          return [path, ...filteredHistory];
-        });
-      }
-    }
-  }; */
-/* 
   const createNewLibrary = async () => {
-    // TODO: Use custom dialog from frontend
-    const libraryName = prompt("Please enter a name for your new library:");
+    const name = prompt("Library name:");
+    if (!name) return;
 
-    if (!libraryName) return;
+    const dir = await open({ directory: true, multiple: false });
+    if (!dir) return;
 
-    const selectedDirectory = await open({
-      directory: true,
-      multiple: false,
-    });
+    const path = `${dir}\\${name}.library`;
 
-    // Check if the user selected a directory
-    if (selectedDirectory) {
-      const newLibraryPath = `${selectedDirectory}/${libraryName}.library`;
+    try {
+      const dbPath = await invoke<string>("create_library", {
+        libraryPath: path,
+      });
 
-      try {
-        const returnedDbPath = await invoke("create_library", { libraryPath: newLibraryPath });
-
-        console.log("El nuevo directorio devuelto:", returnedDbPath)
-
-        if (typeof returnedDbPath === "string") {
-   
-          await getDb(returnedDbPath)
-
-          // Run and apply migrations to selected library database 
-          await invoke("run_migrations", { dbPath: returnedDbPath });
-          
-          console.log(
-            "New library created, migrations applied."
-          );
-
-          await handleLibrarySelect(newLibraryPath);
-        } else {
-          throw new Error("create_library did not return a valid path");
-        }
-      } catch (e) {
-        console.error("Failed to create a new library", e);
-      }
+      await getDb(dbPath);
+      await invoke("run_migrations", { dbPath });
+      await selectLibrary(path);
+    } catch (e) {
+      console.error("Error creating library:", e);
     }
-  }; */
+  };
 
-  const removeLibrary = async (pathToRemove: string) => {
-    if (history) {
-      const newHistory = history.filter((p) => p !== pathToRemove);
-      await setHistory(newHistory);
-
-      if (rootDir === pathToRemove) {
-        await setRootDir(newHistory[0] || "");
-      }
+  const removeLibrary = async (toRemove: string) => {
+    if (updateHistory) {
+      await updateHistory((prev: string[]) => {
+        const next = prev.filter((p) => p !== toRemove);
+        if (rootDir === toRemove) {
+          setRootDir(next[0] ?? "");
+        }
+        return next;
+      });
     }
   };
 
@@ -136,7 +78,7 @@ export function useLibrary() {
           }
         );
 
-        const { folders, images, path_to_id} = importResult;
+        const { folders, images, path_to_id } = importResult;
 
         /*  console.log(importedImagesData)
         if (importedImagesData.length > 0) {
@@ -159,8 +101,7 @@ export function useLibrary() {
 
         console.log("images:", images);
 
-
-       /*   const links = images
+        /*   const links = images
            .map((img) => {
              const folderId = path_to_id[img.parent_dir_path];
              const imageId = path_to_id[img.source_path]; // Use source_path for lookup
@@ -172,11 +113,10 @@ export function useLibrary() {
            console.log(links) */
 
         // 3. Create the links using the map
-         const links = images
+        const links = images
           .map((img) => {
             const folderId = path_to_id[img.parent_dir_path];
             const imageId = path_to_id[img.source_path]; // Use source_path for lookup
-            
 
             if (folderId && imageId) {
               return {
@@ -188,10 +128,9 @@ export function useLibrary() {
           })
           .filter((link) => link !== null);
 
-        
         console.log("links:", links);
 
-        await linkImagesToFolders(`${rootDir}/library.db`, links); 
+        await linkImagesToFolders(`${rootDir}/library.db`, links);
 
         console.log("Library import complete.");
       } catch (e) {
@@ -209,7 +148,7 @@ export function useLibrary() {
     currentLibraryName,
     // Logic
     importImages,
-    handleLibrarySelect,
+    selectLibrary,
     createNewLibrary,
     removeLibrary,
   };

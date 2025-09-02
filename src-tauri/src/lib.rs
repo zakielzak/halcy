@@ -272,50 +272,6 @@ fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
     Ok(image_paths)
 } */
 
-/* #[tauri::command]
-fn create_library(app: AppHandle, library_path: String) -> Result<String, String> {
-    let path = Path::new(&library_path);
-
-    // Check if the dir already exists
-    if path.exists() {
-        return Err("A library with that name already exists in this location.".into());
-    }
-
-    fs::create_dir_all(path).map_err(|e| format!("Failed to create directory: {}", e))?;
-
-    let images_path = path.join("images");
-
-    fs::create_dir_all(&images_path)
-        .map_err(|e| format!("Failed to create images directory: {}", e))?;
-
-    // Grant the webview access to the new library directory
-    app.fs_scope()
-        .allow_directory(&path, true) // `true` for recursive access
-        .map_err(|e| format!("Failed to grant access to library: {}", e))?;
-
-    //Todo:  Start database sqlite for library
-    let db_path = path.join("library.db");
-
-    Ok(db_path.to_string_lossy().to_string().replace("\\", "/"))
-}
- */
-#[tauri::command]
-async fn run_migrations(db_path: String) -> Result<(), String> {
-    // 1. Create a connection pool for the dynamic database path.
-    let db_url = format!("sqlite:{}", db_path);
-    let pool = SqlitePool::connect(&db_url)
-        .await
-        .map_err(|e| format!("Failed to connect to database pool: {}", e))?;
-
-    // 2. This macro will discover and run all migration files
-    // in the 'migrations' directory relative to the Cargo.toml file.
-    migrate!()
-        .run(&pool)
-        .await
-        .map_err(|e| format!("Failed to run migrations: {}", e))?;
-
-    Ok(())
-}
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -353,7 +309,7 @@ pub fn run() {
             commands::create_library,
             import_images,
             scan_library_images,
-            run_migrations
+            commands::run_migrations
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

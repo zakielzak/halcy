@@ -1,83 +1,39 @@
 import { configManager, Settings } from "../lib/config";
 import { useSyncExternalStore } from "react";
 
-type ArrayUpdater<T> = (fn: (prev: T) => T) => Promise<void>;
+type ArrayUpdater<T> = (updater: (prev: T) => T) => Promise<void>;
 
-export function useSetting<K extends keyof Settings>(
-  key: K,
-  fallback: Settings[K]
-) {
-  const state = useSyncExternalStore(
-    configManager.subscribe.bind(configManager),
-    () => configManager.get(key) ?? fallback
-  );
-
-  const set = async (value: Settings[K]) => configManager.set(key, value);
-
-  const setArray = Array.isArray(state)
-    ? ((async (updater: (prev: Settings[K]) => Settings[K]) => {
-        const current = configManager.get(key);
-
-        const updated = updater(current ?? fallback);
-        await configManager.set(key, updated);
-      }) as ArrayUpdater<Settings[K]>)
-    : undefined;
-
-  return [state, set, setArray] as const;
-}
-
-/* 
-type ArrayUpdateFunction<T> = (
-  updater: (current: T) => T
-) => Promise<void>;
-
-type UseSettingResult<K extends keyof Settings> =
-  Settings[K] extends unknown[]
-   ? [
-    Settings[K],
-    (value: Settings[K]) => Promise<void>,
-    ArrayUpdateFunction<Settings[K]>
-   ]
-   : [
-    Settings[K],
-    (value: Settings[K]) => Promise<void>,
-    undefined
-   ];
-
+// Type for the return value of useSetting.
+type UseSettingResult<K extends keyof Settings> = [
+  Settings[K],
+  (value: Settings[K]) => Promise<void>,
+  Settings[K] extends unknown[] ? ArrayUpdater<Settings[K]> : undefined
+];
 
 export function useSetting<K extends keyof Settings>(
   key: K,
   fallback: Settings[K]
 ): UseSettingResult<K> {
   const subscribe = (notify: () => void) =>
-    configManager.subscribe(({ key: changed }) => {
-      if ( changed === key || changed === "*") notify();
-    });
+    configManager.subscribe(() => notify());
 
-    const getSnapshot = () => configManager.get(key) ?? fallback;
-    const getServerSnapshot = () => fallback;
+  const getSnapshot = () => configManager.get(key) ?? fallback;
+  const value = useSyncExternalStore(subscribe, getSnapshot) as Settings[K];
 
-    useEffect(() => {
-      configManager.fetch(key).catch(console.error);
-    }, [key]);
+  const set = async (newValue: Settings[K]) => {
+    await configManager.set(key, newValue);
+  };
 
-    const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot) as Settings[K];
+  const updateArray = (async (updater) => {
+    const current = configManager.get(key) as Settings[K];
+    const updated = updater(current ?? fallback);
+    await configManager.set(key, updated);
+  }) as ArrayUpdater<Settings[K]>;
 
-    const setValue = async (newValue: Settings[K]) => {
-      await configManager.set(key, newValue);
-    }
+  return [
+    value,
+    set,
+    Array.isArray(value) ? updateArray : undefined,
+  ] as UseSettingResult<K>;
+}
 
-    const updateArray = async (
-      updater: (current: any) => any
-    ): Promise<void> => {
-      const currentArray = configManager.get(key) as any[] || [];
-      const updatedArray = updater(currentArray);
-      await configManager.set(key, updatedArray);
-    }
-
-    if (Array.isArray(value)) {
-      return [value, setValue, updateArray] as UseSettingResult<K>;
-    } else {
-      return [value, setValue, undefined] as UseSettingResult<K>;
-    }
-} */

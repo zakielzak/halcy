@@ -23,6 +23,20 @@ pub async fn create_library(app: AppHandle, library_path: String) -> Result<Stri
     Ok(root.join("library.db").to_string_lossy().replace('\\', "/"))
 }
 
+#[tauri::command]
+pub async fn run_migrations(db_path: String) -> Result<(), String> {
+    let url = format!("sqlite:{}", db_path);
+    let pool = sqlx::SqlitePool::connect(&url)
+        .await
+        .map_err(|e| format!("cannot open pool: {e}"))?;
+    sqlx::migrate!()
+        .run(&pool)
+        .await
+        .map_err(|e| format!("migration failed: {e}"))?;
+
+    Ok(())
+}
+
 
 /* use crate::{io, models::*};
 use std::path::Path;

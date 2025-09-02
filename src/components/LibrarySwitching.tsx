@@ -22,7 +22,14 @@ function LibrarySwitching() {
 
   const [open, setOpen] = useState(false);
 
-  const { rootDir , history, currentLibraryName, handleLibrarySelect, createNewLibrary, removeLibrary} = useLibrary()
+  const {
+    rootDir,
+    history,
+    currentLibraryName,
+    selectLibrary,
+    createNewLibrary,
+    removeLibrary,
+  } = useLibrary();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,7 +57,7 @@ function LibrarySwitching() {
                 <CommandItem
                   key={libPath}
                   value={libPath}
-                  onSelect={handleLibrarySelect}
+                  onSelect={selectLibrary}
                   className="flex justify-between items-center"
                 >
                   <div className="flex items-center">
