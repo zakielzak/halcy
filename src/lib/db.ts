@@ -9,7 +9,7 @@ export interface ImageRecord {
   //btime: number;
   //mtime: number;
   width: number;
-  heigth: number;
+  height: number;
   //ext: string;
   //description: string;
   //url_origin: string;
@@ -20,18 +20,19 @@ export interface ImageRecord {
 export interface FolderRecord {
   id: string;
   name: string;
-  parent_id: string | null;
-  description: string | null;
+  parentId: string | null;
+/*   description: string | null; */
  /*  imported_date: string;
   modification_date: string;
  */
 }
 
+let db: Database | null = null;
 
 export async function getDb(dbPath: string): Promise<Database> {
   try {
     console.log("Valor actual en getDB:", dbPath)
-    const db = await Database.load(`sqlite:${dbPath}`);
+    db = await Database.load(`sqlite:${dbPath}`);
     return db;
   } catch (e) {
     console.error("Failed to connect to the database:", e);
@@ -66,6 +67,24 @@ export async function fetchAllImages(dbPath: string): Promise<ImageRecord[]> {
 }
 
 export async function insertImages(
+  path: string,
+  rows: ImageRecord[]
+): Promise<void> {
+  if (!rows.length) return;
+  const db = await getDb(path);
+
+  const sql = `INSERT INTO images (id, filename, path, width, height)
+               VALUES ${rows.map(() => "(?,?,?,?,?)").join(",")}`;
+  await db.execute(sql, rows.flatMap((img) => [
+          img.id,
+          img.filename,
+          img.path,
+          img.width,
+          img.height,
+        ]));
+}
+
+/* export async function insertImages(
   dbPath: string,
   imagesData: ImageRecord[]
 ): Promise<void> {
@@ -99,7 +118,22 @@ export async function insertImages(
     console.error("Error inserting image into the database:", e);
     throw new Error("Failed to insert image.");
   }
-}
+} */
+
+  export async function insertFolders(
+    path: string,
+    rows: FolderRecord[]
+  ): Promise<void> {
+    if (!rows.length) return;
+    const db = await getDb(path);
+    const sql = `INSERT INTO folders (id, name, parent_id) VALUES ${rows.map(() => "(?,?,?)").join(",")}`;
+    await db.execute(
+      sql,
+      rows.flatMap((f) => [f.id, f.name, f.parentId])
+    );
+  }
+
+  /* 
 export async function insertFolders(
   dbPath: string,
   foldersData: FolderRecord[]
@@ -134,7 +168,7 @@ export async function insertFolders(
     console.error("Error inserting folders:", e);
     throw new Error("Failed to insert folders.");
   }
-}
+} *//* 
 export async function linkImagesToFolders(
   dbPath: string,
   links: { folder_id: string; image_id: string }[]
@@ -153,4 +187,21 @@ export async function linkImagesToFolders(
     console.error("Error linking images to folders:", e);
     throw new Error("Failed to link images to folders.");
   }
+} */
+
+  
+export async function linkImagesToFolders(
+  path: string,
+  links: { folder_id: string; image_id: string }[]
+): Promise<void> {
+  if (!links.length) return;
+  const db = await getDb(path);
+  const sql = `INSERT INTO folder_images (folder_id, image_id) VALUES ${links.map(() => "(?,?)").join(",")}`;
+  await db.execute(sql, links.flatMap((l) => [
+    l.folder_id,
+    l.image_id
+  ]
+
+  ));
 }
+

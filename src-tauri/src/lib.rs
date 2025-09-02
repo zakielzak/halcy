@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 mod io;
 mod commands;
+mod models;
 
 use tauri_plugin_sql::{Builder, Migration, MigrationKind};
 
@@ -80,7 +81,7 @@ fn scan_library_images(library_path: String) -> Result<Vec<String>, String> {
 }
 
 //---
-#[tauri::command]
+/* #[tauri::command]
 fn import_images(source_dir: String, dest_dir: String) -> Result<LibraryImportResult, String> {
      let mut folders: Vec<FolderImportData> = Vec::new();
     let mut images: Vec<ImageImportData> = Vec::new();
@@ -164,44 +165,8 @@ fn import_images(source_dir: String, dest_dir: String) -> Result<LibraryImportRe
     Ok(LibraryImportResult { folders, images, path_to_id })
 
 
-  /*   let dest_path = Path::new(&dest_dir).join("images");
-
-    if !dest_path.exists() {
-        return Err("Destination directory does not exist.".to_string());
-    }
-
-    let imported_data: Vec<ImageImportData> = get_image_files(&source_dir)
-        .filter_map(|entry| {
-            let file_name = entry.path().file_name().unwrap();
-            let dest_file = dest_path.join(file_name);
-
-            // Intenta copiar el archivo y obtener sus dimensiones.
-            match fs::copy(entry.path(), &dest_file) {
-                Ok(_) => {
-                    if let Ok(reader) = ImageReader::open(&dest_file) {
-                        if let Ok(image) = reader.into_dimensions() {
-                            let (width, heigth) = image;
-                            return Some(ImageImportData {
-                                path: dest_file.to_string_lossy().to_string(),
-                                filename: file_name.to_string_lossy().to_string(),
-                                width,
-                                heigth,
-                            });
-                        }
-                    }
-                    // Si falla la lectura, devuelve un valor nulo.
-                    None
-                },
-                Err(e) => {
-                    eprintln!("Failed to copy file {:?}: {}", entry.path(), e);
-                    None
-                }
-            }
-        })
-        .collect();
-
-    Ok(imported_data) */
-}
+ 
+} */
 
 /* 
 
@@ -307,7 +272,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::create_library,
-            import_images,
+            commands::import_images,
             scan_library_images,
             commands::run_migrations
         ])

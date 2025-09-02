@@ -3,7 +3,7 @@ import { useSetting } from "./useSettings";
 import { open} from "@tauri-apps/plugin-dialog";
 import { getLibraryName } from "@/lib/utils";
 import { getDb, ImageRecord,  insertFolders,  insertImages, linkImagesToFolders } from "@/lib/db";
-import { FolderImportData, LibraryImportResult } from "@/types";
+import { FolderImportData, ImportResult } from "@/types";
 
 
 
@@ -24,6 +24,7 @@ export function useLibrary() {
   };
 
   const createNewLibrary = async () => {
+    // TODO: use custom dialog in frontend 
     const name = prompt("Library name:");
     if (!name) return;
 
@@ -63,6 +64,49 @@ export function useLibrary() {
       return;
     }
 
+    const srcDir = await open({ directory: true, multiple: false});
+
+    if (!srcDir) return;
+
+    try {
+      const { folders, images, pathLinks } = await invoke<ImportResult>(
+        "import_images",
+        { sourceDir: srcDir, destDir: rootDir }
+      );
+
+      const dbPath = `${rootDir}/library.db`;
+      await insertFolders(dbPath, folders);
+      console.log(images);
+      await insertImages(dbPath, images);
+
+       const links = images
+         .map((img) => ({
+
+           folder_id: pathLinks[img.parentDirPath],
+           image_id: pathLinks[img.sourcePath],
+
+           
+         }))
+         .filter((l) => l.folder_id && l.image_id);
+
+
+         
+       
+       await linkImagesToFolders(dbPath, links);
+       
+
+      
+    } catch (e) {
+      console.error("Failed to import images:", e);
+    }
+  }
+
+/*   const importImages = async () => {
+    if (!rootDir) {
+      console.warn("No active library selected.");
+      return;
+    }
+
     const selectedDirectory = await open({
       directory: true,
       multiple: false,
@@ -80,7 +124,7 @@ export function useLibrary() {
 
         const { folders, images, path_to_id } = importResult;
 
-        /*  console.log(importedImagesData)
+          console.log(importedImagesData)
         if (importedImagesData.length > 0) {
           await insertImages(`${rootDir}/library.db`, importedImagesData);
           console.log(
@@ -88,7 +132,7 @@ export function useLibrary() {
           );
         } else {
           console.log("No images were imported.");
-        } */
+        } 
 
         // 1. Insert folders first. We will rely on the Rust backend
         // to correctly set the parent_id, but we'll do a final check.
@@ -101,7 +145,7 @@ export function useLibrary() {
 
         console.log("images:", images);
 
-        /*   const links = images
+           const links = images
            .map((img) => {
              const folderId = path_to_id[img.parent_dir_path];
              const imageId = path_to_id[img.source_path]; // Use source_path for lookup
@@ -110,7 +154,7 @@ export function useLibrary() {
          console.log(imageId)
 
            }); 
-           console.log(links) */
+           console.log(links) 
 
         // 3. Create the links using the map
         const links = images
@@ -137,15 +181,13 @@ export function useLibrary() {
         console.error("Failed to import images:", e);
       }
     }
-  };
-
-  const currentLibraryName = getLibraryName(rootDir);
+  }; */
 
   return {
     //UI Friendly
     rootDir,
     history,
-    currentLibraryName,
+    currentLibraryName: getLibraryName(rootDir),
     // Logic
     importImages,
     selectLibrary,
