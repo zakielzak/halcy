@@ -20,7 +20,7 @@ export interface ImageRecord {
 export interface FolderRecord {
   id: string;
   name: string;
-  parentId: string | null;
+  parent_id: string | null;
   /*   description: string | null; */
   /*  imported_date: string;
   modification_date: string;
@@ -76,7 +76,7 @@ export const insertFolders = async (
   const sql = `INSERT INTO folders(id, name, parent_id)
                VALUES ${Array(rows.length).fill("(?,?,?)").join(",")}`;
   const params: any[] = [];
-  for (const r of rows) params.push(r.id, r.name, r.parentId);
+  for (const r of rows) params.push(r.id, r.name, r.parent_id);
   await db.execute(sql, params);
 };
 

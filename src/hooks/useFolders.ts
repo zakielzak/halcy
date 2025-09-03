@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchFoldersFromDb, FolderRecord } from "@/lib/db";
 
 export interface FolderTreeItem {
-  parent_id: string | null;
+  parentId: string | null;
   id: string;
   name: string;
   children: string[];
@@ -14,21 +14,22 @@ const transformFoldersToTree = (
 ): Record<string, FolderTreeItem> => {
   const nodes: Record<string, FolderTreeItem> = {};
 
-  // Pass 1: Create a node for each folder
+  // Create a node for each folder with its ID as the key.
+  // This is the structure required by `@headless-tree/core`.
   folders.forEach((folder) => {
     nodes[folder.id] = {
       id: folder.id,
       name: folder.name,
-      children: [],
-      parent_id: folder.parentId || null,
-      description: "a"
+      children: [], // This will be populated in the next pass
+      parentId: folder.parent_id || null,
+      description: "a",
     };
   });
 
-  // Pass 2: Build parent-child relationships
+  // Now, build parent-child relationships using the created nodes.
   folders.forEach((folder) => {
-    if (folder.parentId && nodes[folder.parentId]) {
-      nodes[folder.parentId].children.push(folder.id);
+    if (folder.parent_id && nodes[folder.parent_id]) {
+      nodes[folder.parent_id].children.push(folder.id);
     }
   });
 
@@ -36,12 +37,22 @@ const transformFoldersToTree = (
 };
 
 export const useFolders = (dbPath: string) => {
-  return useQuery({
+
+  const {
+    data: folders,
+    isLoading,
+    isError
+  } = useQuery<FolderRecord[]>({
     queryKey: ["folders", dbPath],
-    queryFn: async () => {
-      const folders = await fetchFoldersFromDb(dbPath);
-      return transformFoldersToTree(folders);
-    },
-    enabled: !!dbPath, // Only run the query when dbPath is available
-  });
+    queryFn:  () =>  fetchFoldersFromDb(dbPath),
+    enabled: !!dbPath
+  })
+
+   return {
+     folders,
+     isLoading,
+     isError,
+   };
+
+ 
 };
