@@ -9,175 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UntaggedRouteImport } from './routes/untagged'
-import { Route as UncategorizedRouteImport } from './routes/uncategorized'
-import { Route as TrashRouteImport } from './routes/trash'
-import { Route as RecentRouteImport } from './routes/recent'
-import { Route as RandomRouteImport } from './routes/random'
-import { Route as AlltagsRouteImport } from './routes/alltags'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
+import { Route as RouteFilterIdRouteImport } from './routes/route.$filterId'
 
-const UntaggedRoute = UntaggedRouteImport.update({
-  id: '/untagged',
-  path: '/untagged',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UncategorizedRoute = UncategorizedRouteImport.update({
-  id: '/uncategorized',
-  path: '/uncategorized',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrashRoute = TrashRouteImport.update({
-  id: '/trash',
-  path: '/trash',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecentRoute = RecentRouteImport.update({
-  id: '/recent',
-  path: '/recent',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RandomRoute = RandomRouteImport.update({
-  id: '/random',
-  path: '/random',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlltagsRoute = AlltagsRouteImport.update({
-  id: '/alltags',
-  path: '/alltags',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
-  id: '/folder/$folderId',
-  path: '/folder/$folderId',
+const RouteFilterIdRoute = RouteFilterIdRouteImport.update({
+  id: '/route/$filterId',
+  path: '/route/$filterId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/alltags': typeof AlltagsRoute
-  '/random': typeof RandomRoute
-  '/recent': typeof RecentRoute
-  '/trash': typeof TrashRoute
-  '/uncategorized': typeof UncategorizedRoute
-  '/untagged': typeof UntaggedRoute
-  '/folder/$folderId': typeof FolderFolderIdRoute
+  '/route/$filterId': typeof RouteFilterIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/alltags': typeof AlltagsRoute
-  '/random': typeof RandomRoute
-  '/recent': typeof RecentRoute
-  '/trash': typeof TrashRoute
-  '/uncategorized': typeof UncategorizedRoute
-  '/untagged': typeof UntaggedRoute
-  '/folder/$folderId': typeof FolderFolderIdRoute
+  '/route/$filterId': typeof RouteFilterIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/alltags': typeof AlltagsRoute
-  '/random': typeof RandomRoute
-  '/recent': typeof RecentRoute
-  '/trash': typeof TrashRoute
-  '/uncategorized': typeof UncategorizedRoute
-  '/untagged': typeof UntaggedRoute
-  '/folder/$folderId': typeof FolderFolderIdRoute
+  '/route/$filterId': typeof RouteFilterIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/alltags'
-    | '/random'
-    | '/recent'
-    | '/trash'
-    | '/uncategorized'
-    | '/untagged'
-    | '/folder/$folderId'
+  fullPaths: '/' | '/route/$filterId'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/alltags'
-    | '/random'
-    | '/recent'
-    | '/trash'
-    | '/uncategorized'
-    | '/untagged'
-    | '/folder/$folderId'
-  id:
-    | '__root__'
-    | '/'
-    | '/alltags'
-    | '/random'
-    | '/recent'
-    | '/trash'
-    | '/uncategorized'
-    | '/untagged'
-    | '/folder/$folderId'
+  to: '/' | '/route/$filterId'
+  id: '__root__' | '/' | '/route/$filterId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AlltagsRoute: typeof AlltagsRoute
-  RandomRoute: typeof RandomRoute
-  RecentRoute: typeof RecentRoute
-  TrashRoute: typeof TrashRoute
-  UncategorizedRoute: typeof UncategorizedRoute
-  UntaggedRoute: typeof UntaggedRoute
-  FolderFolderIdRoute: typeof FolderFolderIdRoute
+  RouteFilterIdRoute: typeof RouteFilterIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/untagged': {
-      id: '/untagged'
-      path: '/untagged'
-      fullPath: '/untagged'
-      preLoaderRoute: typeof UntaggedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/uncategorized': {
-      id: '/uncategorized'
-      path: '/uncategorized'
-      fullPath: '/uncategorized'
-      preLoaderRoute: typeof UncategorizedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/trash': {
-      id: '/trash'
-      path: '/trash'
-      fullPath: '/trash'
-      preLoaderRoute: typeof TrashRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recent': {
-      id: '/recent'
-      path: '/recent'
-      fullPath: '/recent'
-      preLoaderRoute: typeof RecentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/random': {
-      id: '/random'
-      path: '/random'
-      fullPath: '/random'
-      preLoaderRoute: typeof RandomRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alltags': {
-      id: '/alltags'
-      path: '/alltags'
-      fullPath: '/alltags'
-      preLoaderRoute: typeof AlltagsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -185,11 +58,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/folder/$folderId': {
-      id: '/folder/$folderId'
-      path: '/folder/$folderId'
-      fullPath: '/folder/$folderId'
-      preLoaderRoute: typeof FolderFolderIdRouteImport
+    '/route/$filterId': {
+      id: '/route/$filterId'
+      path: '/route/$filterId'
+      fullPath: '/route/$filterId'
+      preLoaderRoute: typeof RouteFilterIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -197,13 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AlltagsRoute: AlltagsRoute,
-  RandomRoute: RandomRoute,
-  RecentRoute: RecentRoute,
-  TrashRoute: TrashRoute,
-  UncategorizedRoute: UncategorizedRoute,
-  UntaggedRoute: UntaggedRoute,
-  FolderFolderIdRoute: FolderFolderIdRoute,
+  RouteFilterIdRoute: RouteFilterIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

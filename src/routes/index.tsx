@@ -13,7 +13,7 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   const { rootDir} = useLibrary();
-  const { images } = useImages(`${rootDir}/library.db`);
+  const { images } = useImages(`${rootDir}/library.db`, "all");
   return (
     <div className="main flex flex-col bg-[#18191c]  ">
       <div

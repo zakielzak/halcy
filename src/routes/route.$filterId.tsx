@@ -4,28 +4,42 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { useImages } from '@/hooks/useImages';
 import { useLibrary } from '@/hooks/useLibrary';
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useLocation, useParams } from '@tanstack/react-router'
 import { ChevronLeft, ChevronRight, Filter, Layout, Minus, Plus, Zap } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
-export const Route = createFileRoute('/folder/$folderId')({
+export const Route = createFileRoute('/route/$filterId')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-
-  const { folderId } = Route.useParams();
+  const { filterId } = Route.useParams();
   const { rootDir } = useLibrary();
 
-   const { images, isLoading, isError } = useImages(
-      `${rootDir}/library.db`,
-      folderId
-    );
+  const { queryType, queryId } = useMemo(() => {
+    switch (filterId) {
+      case "all":
+      case "uncategorized":
+      case "trash":
+        return { queryType: filterId, queryId: undefined };
+      default:
+        // Si no es una de las palabras clave, se asume que es un ID de carpeta
+        return { queryType: "byFolder", queryId: filterId };
+    }
+  }, [filterId]);
 
-    useEffect(() => {
-      console.log(images);
-    }, [images])
+  const { images, isLoading, isError } = useImages(
+    `${rootDir}/library.db`,
+    queryType,
+    queryId
+  );
 
+  useEffect(() => {
+    console.log("Filter ID:", filterId);
+    console.log("Query type:", queryType);
+    console.log("Query Id:", queryId)
+    console.log(images);
+  }, [images]);
 
   return (
     <div className="main flex flex-col bg-[#18191c]  ">

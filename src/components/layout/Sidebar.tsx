@@ -48,7 +48,11 @@ function Sidebar() {
           variant="ghost"
           className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
         >
-          <Link to="/uncategorized" className="flex w-full items-center gap-2">
+          <Link
+            to="/route/$filterId"
+            params={{ filterId: "uncategorized" }}
+            className="flex w-full items-center gap-2"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"

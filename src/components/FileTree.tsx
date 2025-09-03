@@ -127,8 +127,8 @@ export default function FileTree() {
           return (
             <Link
               key={folderId}
-              to="/folder/$folderId"
-              params={{ folderId }}
+              to="/route/$filterId"
+              params={{ filterId: folderId }}
               className="w-full"
             >
               <TreeItem key={item.getId()} item={item} className="mr-2.5 ">

@@ -53,6 +53,36 @@ export const fetchFoldersFromDb = (path: string) =>
 export const fetchAllImages = (path: string) =>
   connect(path).then((db) => db.select<ImageRecord[]>("SELECT * FROM images"));
 
+export const fetchImages = async (path: string, type: string, id?: string) => {
+  const db = await connect(path);
+  let sql = "";
+  let params: any[] = [];
+
+  switch (type) {
+    case "all":
+      sql = "SELECT * FROM images;";
+      break;
+    case "uncategorized":
+      sql = "SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images);";
+      break;
+    case "byFolder":
+      if (!id) throw new Error("Folder ID is required for 'byFolder' type");
+      sql = `
+        SELECT
+      i.*
+      FROM images i
+      JOIN folder_images fi ON i.id = fi.image_id
+      WHERE fi.folder_id = ?;
+      `;
+      params = [id];
+      break
+    default:
+      throw new Error(`Invalid image query type: ${type}`);
+  }
+
+  return db.select<ImageRecord[]>(sql, params);
+}
+
 export const insertImages = async (
   path: string,
   rows: ImageRecord[]
