@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Image {
@@ -17,11 +16,10 @@ pub struct Image {
 #[serde(rename_all = "camelCase")]
 pub struct Folder {
     pub id: String,
-    pub path: String,  //????
+    pub path: String, //????
     pub name: String,
     pub parent_id: Option<String>,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

@@ -7,7 +7,7 @@ use std::{
 };
 use tokio::fs;
 use uuid::Uuid;
-use walkdir:: WalkDir;
+use walkdir::WalkDir;
 
 // ---------- static fast extension check ------
 const IMAGE_EXTS: &[&str] = &["bmp", "gif", "jfif", "jpeg", "jpg", "png", "webp"];

@@ -37,6 +37,8 @@ export function useLibrary() {
 
     const path = `${dir}\\${name}.library`;
 
+    console.log("path:", path)
+
     try {
       const dbPath = await invoke<string>("create_library", {
         libraryPath: path,
