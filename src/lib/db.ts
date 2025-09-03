@@ -27,6 +27,13 @@ export interface FolderRecord {
  */
 }
 
+interface ImageCounts {
+  allImages: number;
+  uncategorized: number;
+  /* trash: number; */
+  folders: Record<string, number>; // Un objeto mapeado por folderId a su conteo
+}
+
 const pools = new Map<string, Database>();
 
 export async function connect(dbPath: string): Promise<Database> {
@@ -82,6 +89,8 @@ export const fetchImages = async (path: string, type: string, id?: string) => {
 
   return db.select<ImageRecord[]>(sql, params);
 }
+
+
 
 export const insertImages = async (
   path: string,

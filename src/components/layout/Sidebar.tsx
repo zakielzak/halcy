@@ -5,12 +5,42 @@ import { useLibrary } from '@/hooks/useLibrary';
 import FileTree from '../FileTree';
 import { Link } from "@tanstack/react-router";
 import { useFolders } from '@/hooks/useFolders';
+import { useImageCounts } from '@/hooks/useImageCounts';
+import { useEffect } from 'react';
 
 
 function Sidebar() {
-   const { importImages } = useLibrary();
-   const {rootDir} = useLibrary();
-   const { isLoading } = useFolders(`${rootDir}/library.db`);
+  const { importImages } = useLibrary();
+  const { rootDir } = useLibrary();
+  const dbPath = `${rootDir}/library.db`;
+  const { isLoading } = useFolders(dbPath);
+
+  const { counts, isLoading: isImageCountsLoading } = useImageCounts(dbPath);
+
+  // Extrae los conteos de forma segura, usando 0 como valor predeterminado si están cargando o hay error
+  const allCount = counts?.allImages ?? 0;
+  const uncategorizedCount = counts?.uncategorized ?? 0;
+
+  // Usa `useEffect` para rastrear los cambios en `counts`
+  useEffect(() => {
+
+      console.log("Counts updated:", counts?.allImages);
+  
+  }, []);
+/*   const trashCount = counts?.trash ?? 0; */
+
+  const renderCount = (count: number) => {
+    return isImageCountsLoading ? (
+      <span className="ml-auto text-[10px] tracking-wider text-white/60">
+        ...
+      </span>
+    ) : (
+      <span className="ml-auto text-[10px] tracking-wider text-white/60">
+        {/* {count.toLocaleString()} */}
+        {count ? count.toLocaleString() : ""}
+      </span>
+    );
+  };
   return (
     <div className="sidebar flex flex-col bg-[#1f2023] w-[200px]  border-r border-[#313134]  overflow-hidden">
       <div
@@ -39,9 +69,8 @@ function Sidebar() {
           <Link to="/" className="flex w-full items-center gap-2">
             <Inbox size={16} />
             <span>All</span>
-            <span className="ml-auto text-[10px] tracking-wider text-white/60">
-              3,093
-            </span>
+
+            {renderCount(allCount)}
           </Link>
         </Button>
         <Button
@@ -71,9 +100,8 @@ function Sidebar() {
               <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
             </svg>
             <span>Uncategorized</span>
-            <span className="ml-auto text-[10px] tracking-wider text-white/60">
-              2
-            </span>
+
+            {renderCount(uncategorizedCount)}
           </Link>
         </Button>
         <Button
@@ -99,7 +127,7 @@ function Sidebar() {
           </svg>
           <span>Untagged</span>
           <span className="ml-auto text-[10px] tracking-wider text-white/60">
-            2
+            
           </span>
         </Button>
         <Button

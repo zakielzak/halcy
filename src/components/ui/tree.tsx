@@ -133,12 +133,14 @@ function TreeItem<T = any>({
 interface TreeItemLabelProps<T = any>
   extends React.HTMLAttributes<HTMLSpanElement> {
   item?: ItemInstance<T>;
+  count?: number;
 }
 
 function TreeItemLabel<T = any>({
   item: propItem,
   children,
   className,
+  count,
   ...props
 }: TreeItemLabelProps<T>) {
   const { currentItem } = useTreeContext<T>();
@@ -169,7 +171,7 @@ function TreeItemLabel<T = any>({
           (typeof item.getItemName === "function" ? item.getItemName() : null)}
       </span>
       <span className="ml-auto text-[10px] tracking-wider text-white/60 ">
-        3,012
+        {count ? count.toLocaleString() : ""}
       </span>
     </span>
   );

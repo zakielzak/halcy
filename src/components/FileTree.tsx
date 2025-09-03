@@ -8,6 +8,7 @@ import { useFolders } from "@/hooks/useFolders";
 import { useLibrary } from "@/hooks/useLibrary";
 import { FolderRecord } from "@/lib/db";
 import { Link } from "@tanstack/react-router";
+import { useImageCounts } from "@/hooks/useImageCounts";
 
 
 
@@ -71,6 +72,11 @@ export default function FileTree() {
   const { rootDir } = useLibrary();
   const { folders, isLoading, isError } = useFolders(`${rootDir}/library.db`);
   const parentRef = useRef<HTMLDivElement>(null);
+    const {
+      counts,
+      isLoading: isCountsLoading,
+      isError: isCountsError,
+    } = useImageCounts(`${rootDir}/library.db`);
 
   const folderTree = useMemo(() => {
     if (!folders) return {};
@@ -124,6 +130,8 @@ export default function FileTree() {
       <Tree indent={indent} tree={tree}>
         {tree.getItems().map((item) => {
           const folderId = item.getId();
+
+           const count = counts?.folders?.[folderId] ?? 0;
           return (
             <Link
               key={folderId}
@@ -132,7 +140,7 @@ export default function FileTree() {
               className="w-full"
             >
               <TreeItem key={item.getId()} item={item} className="mr-2.5 ">
-                <TreeItemLabel />
+                <TreeItemLabel count={count} />
               </TreeItem>
             </Link>
           );
