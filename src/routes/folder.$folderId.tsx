@@ -5,15 +5,28 @@ import { Slider } from '@/components/ui/slider';
 import { useImages } from '@/hooks/useImages';
 import { useLibrary } from '@/hooks/useLibrary';
 import { createFileRoute } from '@tanstack/react-router'
-import { ChevronLeft, ChevronRight, Filter, Grid, Grid2X2, Layout, Minus, Plus, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Filter, Layout, Minus, Plus, Zap } from 'lucide-react';
+import { useEffect } from 'react';
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/folder/$folderId')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { rootDir} = useLibrary();
-  const { images } = useImages(`${rootDir}/library.db`);
+
+  const { folderId } = Route.useParams();
+  const { rootDir } = useLibrary();
+
+   const { images, isLoading, isError } = useImages(
+      `${rootDir}/library.db`,
+      folderId
+    );
+
+    useEffect(() => {
+      console.log(images);
+    }, [images])
+
+
   return (
     <div className="main flex flex-col bg-[#18191c]  ">
       <div
@@ -56,11 +69,14 @@ function RouteComponent() {
               <Filter size={16} />
             </Button>
           </div>
-          <Input className="h-7 placeholder:font-medium placeholder:text-xs" placeholder='Search' />
+          <Input
+            className="h-7 placeholder:font-medium placeholder:text-xs"
+            placeholder="Search"
+          />
         </div>
       </div>
 
-      <ImagesGallery images={images}/>
+      <ImagesGallery images={images} />
     </div>
-  ); 
+  );
 }

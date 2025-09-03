@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core";
+import { dragAndDropFeature, hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
 
 import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
@@ -7,6 +7,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { useFolders } from "@/hooks/useFolders";
 import { useLibrary } from "@/hooks/useLibrary";
 import { FolderRecord } from "@/lib/db";
+import { Link } from "@tanstack/react-router";
 
 
 
@@ -86,7 +87,7 @@ export default function FileTree() {
     },
     getItemName: (item) => item.getItemData().name,
     isItemFolder: () => true,
-    features: [syncDataLoaderFeature, hotkeysCoreFeature],
+    features: [syncDataLoaderFeature, hotkeysCoreFeature, dragAndDropFeature],
   });
 
  
@@ -107,6 +108,8 @@ export default function FileTree() {
     
   }, [tree.getItems(), virtualizer]);
 
+  
+
 
   if (isError || !folders || folders.length === 0 || tree.getItems().length === 0) {
     return (
@@ -120,15 +123,21 @@ export default function FileTree() {
     <div className="flex h-full w-full flex-col gap-2 *:first:grow dark mt-1">
       <Tree indent={indent} tree={tree}>
         {tree.getItems().map((item) => {
-           
-           console.log(item.getId())
-
+          const folderId = item.getId();
           return (
-            <TreeItem key={item.getId()} item={item} className="mr-2.5 ">
-              <TreeItemLabel />
-            </TreeItem>
+            <Link
+              key={folderId}
+              to="/folder/$folderId"
+              params={{ folderId }}
+              className="w-full"
+            >
+              <TreeItem key={item.getId()} item={item} className="mr-2.5 ">
+                <TreeItemLabel />
+              </TreeItem>
+            </Link>
           );
         })}
+        <div style={tree.getDragLineStyle()} className="dragline" />
       </Tree>
     </div>
   );

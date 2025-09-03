@@ -1,6 +1,7 @@
 import { useImages } from "@/hooks/useImages";
 import { useLibrary } from "@/hooks/useLibrary";
 import { useSetting } from "@/hooks/useSettings";
+import { ImageRecord } from "@/lib/db";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -14,7 +15,7 @@ const ImageCard = ({
   image: {
     path: string;
     width: number;
-    heigth: number;
+    height: number;
   };
   style: React.CSSProperties;
 }) => {
@@ -30,18 +31,18 @@ const ImageCard = ({
         className="w-full h-full object-fill transition-opacity duration-300"
        
         width={image.width}
-        height={image.heigth}
+        height={image.height}
       />
     </div>
   );
 };
 
-function ImagesGallery() {
+function ImagesGallery({ images }: { images?: ImageRecord[] }) {
  /*  const { rootDir } = useLibrary(); */
 
    const [rootDir, setRootDir] = useSetting("rootDir", "");
 
-  const { images } = useImages(`${rootDir}/library.db`);
+ /*  const { images } = useImages(`${rootDir}/library.db`); */
 
   const parentRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);

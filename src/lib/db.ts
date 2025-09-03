@@ -92,3 +92,16 @@ export const linkImagesToFolders = async (
   for (const l of links) params.push(l.folder_id, l.image_id);
   await db.execute(sql, params);
 };
+
+export const fetchImagesByFolder = async (path: string, folderId: string) => {
+  const db = await connect(path);
+  return db.select<ImageRecord[]>(
+    `SELECT
+      i.*
+      FROM images i
+      JOIN folder_images fi ON i.id = fi.image_id
+      WHERE fi.folder_id = ?;
+    `,
+    [folderId]
+  )
+}

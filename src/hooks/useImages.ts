@@ -1,4 +1,4 @@
-import { fetchAllImages, ImageRecord } from "@/lib/db"
+import { fetchAllImages, fetchImagesByFolder, ImageRecord } from "@/lib/db"
 import { useQuery } from "@tanstack/react-query"
 
 /**
@@ -6,20 +6,30 @@ import { useQuery } from "@tanstack/react-query"
  * @param dbPath The file path to the library's database.
  */
 
-export const useImages = (dbPath: string) => {
-    const {
-        data: images,
-        isLoading,
-        isError
-    } = useQuery<ImageRecord[]>({
-        queryKey: ["images", dbPath],
-        queryFn: () => fetchAllImages(dbPath),
-        enabled: !!dbPath
-    })
+export const useImages = (dbPath: string, folderId?: string) => {
+  const queryKey = ["images", dbPath, folderId];
+  // Define la función de fetching.
+  const queryFn = () => {
+    if (folderId) {
+      return fetchImagesByFolder(dbPath, folderId);
+    }
+    // Si no hay folderId, se traen todas las imágenes.
+    return fetchAllImages(dbPath);
+  };
 
-    return {
-        images,
-        isLoading,
-        isError,
-    };
-}
+  const {
+    data: images,
+    isLoading,
+    isError,
+  } = useQuery<ImageRecord[]>({
+    queryKey,
+    queryFn,
+    enabled: !!dbPath,
+  });
+
+  return {
+    images,
+    isLoading,
+    isError,
+  };
+};

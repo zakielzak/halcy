@@ -16,6 +16,7 @@ import { Route as RecentRouteImport } from './routes/recent'
 import { Route as RandomRouteImport } from './routes/random'
 import { Route as AlltagsRouteImport } from './routes/alltags'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 
 const UntaggedRoute = UntaggedRouteImport.update({
   id: '/untagged',
@@ -52,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
+  id: '/folder/$folderId',
+  path: '/folder/$folderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/trash': typeof TrashRoute
   '/uncategorized': typeof UncategorizedRoute
   '/untagged': typeof UntaggedRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/trash': typeof TrashRoute
   '/uncategorized': typeof UncategorizedRoute
   '/untagged': typeof UntaggedRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/trash': typeof TrashRoute
   '/uncategorized': typeof UncategorizedRoute
   '/untagged': typeof UntaggedRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/uncategorized'
     | '/untagged'
+    | '/folder/$folderId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/uncategorized'
     | '/untagged'
+    | '/folder/$folderId'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/trash'
     | '/uncategorized'
     | '/untagged'
+    | '/folder/$folderId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   TrashRoute: typeof TrashRoute
   UncategorizedRoute: typeof UncategorizedRoute
   UntaggedRoute: typeof UntaggedRoute
+  FolderFolderIdRoute: typeof FolderFolderIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/folder/$folderId': {
+      id: '/folder/$folderId'
+      path: '/folder/$folderId'
+      fullPath: '/folder/$folderId'
+      preLoaderRoute: typeof FolderFolderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrashRoute: TrashRoute,
   UncategorizedRoute: UncategorizedRoute,
   UntaggedRoute: UntaggedRoute,
+  FolderFolderIdRoute: FolderFolderIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
