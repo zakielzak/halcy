@@ -19,7 +19,7 @@ function Inspector() {
   return (
     <div className="inspector bg-[#1f2023] w-[200px] flex flex-col overflow-hidden border-l border-[#313134]">
       <div
-        className="flex items-center justify-end  h-12 w-full  px-2"
+        className="flex items-center justify-end  h-12 w-full  px-2 "
         data-tauri-drag-region
       >
         <Button

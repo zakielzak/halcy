@@ -42,9 +42,6 @@ export const countAllFolders = (folderTree: FolderTree | undefined): number => {
     return 0;
   }
 
-  // The 'root' node is not a user-created folder, so we start with a count of -1
-  // to compensate for it being in the object.
-  // We can also just iterate over the object entries and check if the key is 'root'.
   let count = 0;
   for (const key in folderTree) {
     // We only count actual folders, not the synthetic 'root' node

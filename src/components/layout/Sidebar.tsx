@@ -6,7 +6,6 @@ import FileTree from '../FileTree';
 import { Link, LinkProps } from "@tanstack/react-router";
 import { useFolders } from '@/hooks/useFolders';
 import { useCounts } from '@/hooks/useCounts';
-import { useEffect } from 'react';
 
 import React from 'react';
 import { countAllFolders } from '@/lib/utils';
@@ -142,7 +141,7 @@ function Sidebar() {
   return (
     <div className="sidebar flex flex-col bg-[#1f2023] w-[200px]  border-r border-[#313134]  overflow-hidden">
       <div
-        className="w-full h-22.5 flex items-center px-2 justify-end gap-1"
+        className="w-full h-22.5 flex items-center px-2 justify-end gap-1 "
         data-tauri-drag-region
       >
         <Button size="icon" variant="ghost" onClick={() => importImages()}>
