@@ -27,12 +27,14 @@ export interface FolderRecord {
  */
 }
 
-interface ImageCounts {
+
+export interface Counts {
   allImages: number;
   uncategorized: number;
   /* trash: number; */
-  folders: Record<string, number>; // Un objeto mapeado por folderId a su conteo
+  folders: Record<string, number>;
 }
+
 
 const pools = new Map<string, Database>();
 
@@ -52,15 +54,16 @@ export async function connect(dbPath: string): Promise<Database> {
   }
 }
 
-export const fetchFoldersFromDb = (path: string) =>
+export const fetchFolders = (path: string) =>
   connect(path).then((db) =>
     db.select<FolderRecord[]>("SELECT * FROM folders")
   );
 
-export const fetchAllImages = (path: string) =>
-  connect(path).then((db) => db.select<ImageRecord[]>("SELECT * FROM images"));
-
-export const fetchImages = async (path: string, type: string, id?: string) => {
+export const fetchImages = async (
+  path: string,
+  type: string,
+  id?: string
+): Promise<ImageRecord[]> => {
   const db = await connect(path);
   let sql = "";
   let params: any[] = [];
@@ -70,7 +73,8 @@ export const fetchImages = async (path: string, type: string, id?: string) => {
       sql = "SELECT * FROM images;";
       break;
     case "uncategorized":
-      sql = "SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images);";
+      sql =
+        "SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images);";
       break;
     case "byFolder":
       if (!id) throw new Error("Folder ID is required for 'byFolder' type");
@@ -82,15 +86,13 @@ export const fetchImages = async (path: string, type: string, id?: string) => {
       WHERE fi.folder_id = ?;
       `;
       params = [id];
-      break
+      break;
     default:
       throw new Error(`Invalid image query type: ${type}`);
   }
 
   return db.select<ImageRecord[]>(sql, params);
-}
-
-
+};
 
 export const insertImages = async (
   path: string,
@@ -142,5 +144,43 @@ export const fetchImagesByFolder = async (path: string, folderId: string) => {
       WHERE fi.folder_id = ?;
     `,
     [folderId]
-  )
-}
+  );
+};
+
+export const fetchCounts = async (dbPath: string): Promise<Counts> => {
+  try {
+    const db = await connect(dbPath);
+
+    const results: {
+      all_images_count: number;
+      uncategorized_count: number;
+    }[] = await db.select(`
+      SELECT
+        (SELECT COUNT(*) FROM images) as all_images_count,
+        (SELECT COUNT(*) FROM images WHERE id NOT IN (SELECT image_id FROM folder_images)) as uncategorized_count;
+    `);
+
+    const foldersQuery: { folder_id: string; count: number }[] =
+      await db.select(
+        "SELECT folder_id, COUNT(*) as count FROM folder_images GROUP BY folder_id;"
+      );
+
+    const counts = results[0];
+    const foldersCount = foldersQuery.reduce(
+      (acc, folder) => {
+        acc[folder.folder_id] = folder.count;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    return {
+      allImages: counts?.all_images_count ?? 0,
+      uncategorized: counts?.uncategorized_count ?? 0,
+      folders: foldersCount,
+    };
+  } catch (error) {
+    console.error("Error in fetchCounts:", error);
+    throw new Error("Failed to fetch image counts.");
+  }
+};

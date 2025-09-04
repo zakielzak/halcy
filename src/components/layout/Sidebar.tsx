@@ -3,44 +3,142 @@ import { FileClock, Inbox, Plus, Shuffle, SidebarIcon, Tag, Trash2 } from 'lucid
 import { Button } from '@/components/ui/button';
 import { useLibrary } from '@/hooks/useLibrary';
 import FileTree from '../FileTree';
-import { Link } from "@tanstack/react-router";
+import { Link, LinkProps } from "@tanstack/react-router";
 import { useFolders } from '@/hooks/useFolders';
-import { useImageCounts } from '@/hooks/useImageCounts';
+import { useCounts } from '@/hooks/useCounts';
 import { useEffect } from 'react';
+
+import React from 'react';
+import { countAllFolders } from '@/lib/utils';
+
+interface NavItemProps {
+  to?: LinkProps['to'];
+  params?: LinkProps['params'];
+  label: string;
+  icon: React.ReactNode;
+  count?: number | string;
+}
+
+export const NavItem = ({to, params, label, icon, count}: NavItemProps) => {
+  return (
+    <Button
+      variant="ghost"
+      className="flex items-center gap-2 text-xs font-medium px-1 py-1.5 h-auto justify-start w-full"
+      asChild
+    >
+      <Link to={to} params={params}>
+        {icon}
+        <span>{label}</span>
+
+        <span className="ml-auto text-[10px] text-white/60">
+          {count ? count.toLocaleString() : ""}
+        </span>
+      </Link>
+    </Button>
+  );
+
+}
+
 
 
 function Sidebar() {
   const { importImages } = useLibrary();
   const { rootDir } = useLibrary();
   const dbPath = `${rootDir}/library.db`;
-  const { isLoading } = useFolders(dbPath);
+  const {data: folderTree, isLoading } = useFolders(dbPath);
 
-  const { counts, isLoading: isImageCountsLoading } = useImageCounts(dbPath);
+  const { counts} = useCounts(dbPath);
 
-  // Extrae los conteos de forma segura, usando 0 como valor predeterminado si están cargando o hay error
-  const allCount = counts?.allImages ?? 0;
-  const uncategorizedCount = counts?.uncategorized ?? 0;
+    const navItems = [
+      {
+        to: "/" as const,
+        label: "All",
+        icon: <Inbox size={16} />,
+        count: counts?.allImages,
+      },
+      {
+        to: "/route/$filterId" as const,
+        params: { filterId: "uncategorized" },
+        label: "Uncategorized",
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="icon icon-tabler icons-tabler-outline icon-tabler-folder-question"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 19h-10a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v2.5" />
+            <path d="M19 22v.01" />
+            <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+          </svg>
+        ),
+        count: counts?.uncategorized,
+      },
+      {
+        to: "/route/$filterId" as const,
+        params: { filterId: "untagged" },
+        label: "Untagged",
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="icon icon-tabler icons-tabler-outline icon-tabler-bookmark-question"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 19l-3 -2l-6 4v-14a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v4" />
+            <path d="M19 22v.01" />
+            <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
+          </svg>
+        ),
+        count: /* counts?.trash || */ "",
+      },
+      {
+        to: "/route/$filterId" as const,
+        params: { filterId: "recently-used" },
+        label: "Recently Used",
+        icon: <FileClock size={16} />,
+      },
+      {
+        to: "/route/$filterId" as const,
+        params: { filterId: "all-tags" },
+        label: "All Tags",
+        icon: <Tag size={16} />,
+        count: /* counts?.trash || */ "",
+      },
+      {
+        to: "/route/$filterId" as const,
+        params: { filterId: "random" },
+        label: "Random",
+        icon: <Shuffle size={16} />,
+      },
+      {
+        to: "/route/$filterId" as const,
+        params: { filterId: "trash" },
+        label: "Trash",
+        icon: <Trash2 size={16} />,
+        count: /* counts?.trash || */ "",
+      },
+    ];
 
-  // Usa `useEffect` para rastrear los cambios en `counts`
-  useEffect(() => {
+     const totalFolderCount = countAllFolders(folderTree);
+     
+     console.log(totalFolderCount)
 
-      console.log("Counts updated:", counts?.allImages);
-  
-  }, []);
-/*   const trashCount = counts?.trash ?? 0; */
 
-  const renderCount = (count: number) => {
-    return isImageCountsLoading ? (
-      <span className="ml-auto text-[10px] tracking-wider text-white/60">
-        ...
-      </span>
-    ) : (
-      <span className="ml-auto text-[10px] tracking-wider text-white/60">
-        {/* {count.toLocaleString()} */}
-        {count ? count.toLocaleString() : ""}
-      </span>
-    );
-  };
   return (
     <div className="sidebar flex flex-col bg-[#1f2023] w-[200px]  border-r border-[#313134]  overflow-hidden">
       <div
@@ -61,120 +159,29 @@ function Sidebar() {
       </div>
 
       {/* SIDEBAR BODY */}
-      <div className="mt-2.5 flex flex-col px-2.5 w-full">
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
-        >
-          <Link to="/" className="flex w-full items-center gap-2">
-            <Inbox size={16} />
-            <span>All</span>
-
-            {renderCount(allCount)}
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
-        >
-          <Link
-            to="/route/$filterId"
-            params={{ filterId: "uncategorized" }}
-            className="flex w-full items-center gap-2"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              className="icon icon-tabler icons-tabler-outline icon-tabler-folder-question"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M15 19h-10a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v2.5" />
-              <path d="M19 22v.01" />
-              <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
-            </svg>
-            <span>Uncategorized</span>
-
-            {renderCount(uncategorizedCount)}
-          </Link>
-        </Button>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            className="icon icon-tabler icons-tabler-outline icon-tabler-bookmark-question"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M15 19l-3 -2l-6 4v-14a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v4" />
-            <path d="M19 22v.01" />
-            <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
-          </svg>
-          <span>Untagged</span>
-          <span className="ml-auto text-[10px] tracking-wider text-white/60">
-            
-          </span>
-        </Button>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto justify-start"
-        >
-          <FileClock size={16} />
-          <span>Recently Useds</span>
-        </Button>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto"
-        >
-          <Tag size={16} />
-          <span>All Tags</span>
-          <span className="ml-auto text-[10px] tracking-wider text-white/60">
-            2
-          </span>
-        </Button>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto justify-start"
-        >
-          <Shuffle size={16} />
-          <span>Random</span>
-        </Button>
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 text-xs font-medium  px-1 py-1.5 h-auto "
-        >
-          <Trash2 size={16} />
-          <span>Trash</span>
-          <span className="ml-auto text-[10px] tracking-wider text-white/60">
-            3
-          </span>
-        </Button>
-      </div>
+      <nav className="mt-2.5 flex flex-col px-2.5 w-full">
+        {navItems.map((item) => (
+          <NavItem
+            key={item.label}
+            to={item.to}
+            params={item.params}
+            label={item.label}
+            icon={item.icon}
+            count={item.count}
+          />
+        ))}
+        
+      </nav>
 
       {/* FOLDERS SIDEBAR */}
       <div className="pt-2 mt-2  border-t/ border-neutral-700/ w-full h-full overflow-y-auto scrollbar">
         <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 mb-2.5 ">
           Smart Folders
-          <span className="text-[11px]">{`(3)`}</span>
+          <span className="text-[11px]">{`(0)`}</span>
         </div>
         <div className="text-xs px-3 font-semibold tracking-wide flex h-3.5  items-center  gap-1 mb-2">
           Folders
-          <span className="text-[11px]">{`(26)`}</span>
+          <span className="text-[11px]">{`(${totalFolderCount})`}</span>
         </div>
 
         {(isLoading && <div>loading...</div>) || <FileTree />}

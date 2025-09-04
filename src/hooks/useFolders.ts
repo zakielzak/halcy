@@ -1,58 +1,51 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchFoldersFromDb, FolderRecord } from "@/lib/db";
+import { fetchFolders, FolderRecord } from "@/lib/db";
 
-export interface FolderTreeItem {
-  parentId: string | null;
-  id: string;
+
+export interface FolderNode {
   name: string;
   children: string[];
-  description: string;
 }
 
-const transformFoldersToTree = (
-  folders: FolderRecord[]
-): Record<string, FolderTreeItem> => {
-  const nodes: Record<string, FolderTreeItem> = {};
+export interface FolderTree {
+  [id: string]: FolderNode;
+}
 
-  // Create a node for each folder with its ID as the key.
-  // This is the structure required by `@headless-tree/core`.
-  folders.forEach((folder) => {
-    nodes[folder.id] = {
-      id: folder.id,
-      name: folder.name,
-      children: [], // This will be populated in the next pass
-      parentId: folder.parent_id || null,
-      description: "a",
-    };
-  });
+export const buildFolderTree = (folders: FolderRecord[]): FolderTree => {
+    const folderMap = new Map<string, FolderNode>();
+    const rootIds = new Set<string>();
 
-  // Now, build parent-child relationships using the created nodes.
-  folders.forEach((folder) => {
-    if (folder.parent_id && nodes[folder.parent_id]) {
-      nodes[folder.parent_id].children.push(folder.id);
-    }
-  });
+    folderMap.set("root", { name: "root", children: [] });
 
-  return nodes;
+    const parentChildrenMap = new Map<string | null, string[]>();
+    folders.forEach((folder) => {
+      folderMap.set(folder.id, { name: folder.name, children: [] });
+      const parentId = folder.parent_id;
+      if (parentId === null) {
+          rootIds.add(folder.id);
+      } else {
+          if (!parentChildrenMap.has(parentId)) {
+              parentChildrenMap.set(parentId, []);
+          }
+          parentChildrenMap.get(parentId)!.push(folder.id);
+      }
+    });
+
+    folderMap.forEach((node, id) => {
+        if (parentChildrenMap.has(id)) {
+            node.children = parentChildrenMap.get(id)!;
+        }
+    });
+
+    folderMap.get("root")!.children.push(...Array.from(rootIds));
+    return Object.fromEntries(folderMap);
 };
 
 export const useFolders = (dbPath: string) => {
-
-  const {
-    data: folders,
-    isLoading,
-    isError
-  } = useQuery<FolderRecord[]>({
+  return useQuery<FolderRecord[], Error, FolderTree>({
     queryKey: ["folders", dbPath],
-    queryFn:  () =>  fetchFoldersFromDb(dbPath),
-    enabled: !!dbPath
-  })
-
-   return {
-     folders,
-     isLoading,
-     isError,
-   };
-
- 
+    queryFn: () => fetchFolders(dbPath),
+    enabled: !!dbPath,
+    select: (folders) => buildFolderTree(folders),
+  });
 };

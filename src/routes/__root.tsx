@@ -2,7 +2,6 @@ import "@/App.css";
 import { Fragment } from "react/jsx-runtime";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
 
-import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import Inspector from "@/components/layout/Inspector";
 
@@ -16,17 +15,17 @@ function RootComponent() {
 
   return (
     <Fragment>
-   
-        {/* HEADER */}
-        {/* <Header/> */}
+      {/* HEADER */}
+      {/* <Header/> */}
 
-        <Sidebar />
+      <Sidebar />
 
-        {/* CONTENT */}
+      {/* CONTENT */}
+      <main className="main flex flex-col bg-[#18191c]">
         <Outlet />
+      </main>
 
-        <Inspector />
-      
+      <Inspector />
     </Fragment>
   );
 }

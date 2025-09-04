@@ -1,5 +1,5 @@
-import { fetchAllImages, fetchImages, fetchImagesByFolder, ImageRecord } from "@/lib/db"
-import { useQuery } from "@tanstack/react-query"
+import { fetchImages, ImageRecord } from "@/lib/db";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * A custom hook to fetch and manage images based on a filter type.
@@ -9,21 +9,13 @@ import { useQuery } from "@tanstack/react-query"
  */
 
 export const useImages = (dbPath: string, type: string, folderId?: string) => {
-  const queryKey = ["images", dbPath, type, folderId];
-  // Define la función de fetching.
-  const queryFn = () => {
-
-      return fetchImages(dbPath, type, folderId);
-    
-  };
-
   const {
     data: images,
     isLoading,
     isError,
   } = useQuery<ImageRecord[]>({
-    queryKey,
-    queryFn,
+    queryKey: ["images", dbPath, type, folderId],
+    queryFn: () => fetchImages(dbPath, type, folderId),
     enabled: !!dbPath && !!type,
   });
 
