@@ -6,8 +6,10 @@ use std::{
     path::{Path, PathBuf},
 };
 use tokio::fs;
+use std::fs as stdfs;
 use uuid::Uuid;
 use walkdir::WalkDir;
+use chrono::{DateTime, Utc};
 
 // ---------- static fast extension check ------
 const IMAGE_EXTS: &[&str] = &["bmp", "gif", "jfif", "jpeg", "jpg", "png", "webp"];
@@ -40,6 +42,13 @@ fn read_dim(path: &Path) -> Result<(u32, u32)> {
     image::image_dimensions(path).with_context(|| format!("header {:?}", path))
 }
 
+fn read_file_dates(path: &Path) -> Result<(String, String)> {
+    let metadata = stdfs::metadata(path)?;
+    let creation_date: DateTime<Utc> = metadata.created()?.into();
+    let modification_date: DateTime<Utc> = metadata.modified()?.into();
+    Ok((creation_date.to_string(), modification_date.to_string()))
+}
+
 pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
     let images_dir = dest.join("images");
     fs::create_dir_all(&images_dir).await?;
@@ -59,6 +68,8 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
             .to_string_lossy()
             .into_owned(),
         parent_id: None,
+        order_by: "imported_date".to_string(),
+        is_ascending: 1.to_string(),
     });
 
     for entry in WalkDir::new(source).min_depth(1) {
@@ -75,6 +86,8 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
                 path: k.clone(),
                 name: entry.file_name().to_string_lossy().into_owned(),
                 parent_id,
+                  order_by: "imported_date".to_string(),
+        is_ascending: 1.to_string(),
             });
             path_links.insert(k, id);
         }
@@ -88,6 +101,12 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
             if !has_img_ext(&src_path) {
                 return None;
             }
+
+            let (creation_date, modified_date) = match read_file_dates(&src_path) {
+                Ok(d) => d,
+                Err(_) => return None,
+            };
+
             let dim = match read_dim(&src_path) {
                 Ok(d) => d,
                 Err(_) => return None,
@@ -98,24 +117,25 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
                 .unwrap_or("bin");
             let dest_name = format!("{}.{}", Uuid::new_v4(), ext);
             let dest_path = images_dir.join(&dest_name);
-            Some((src_path, dest_path, dim))
+            Some((src_path, dest_path, dim, creation_date, modified_date))
         })
         .collect();
 
     // 3: Execute copies
     let handles: Vec<_> = image_tasks
         .into_iter()
-        .map(|(src, dst, (w, h))| {
+        .map(|(src, dst, (w, h), created, modified)| {
             tokio::task::spawn_blocking(move || {
                 std::fs::copy(&src, &dst)?;
-                Ok::<_, anyhow::Error>((src, dst, w, h))
+                Ok::<_, anyhow::Error>((src, dst, w, h, modified, created))
             })
         })
         .collect();
 
     let mut images = Vec::with_capacity(handles.len());
+    let imported_date = Utc::now().to_string();
     for h in handles {
-        let (src, dst, width, height) = h.await??;
+        let (src, dst, width, height , modified_date, creation_date) = h.await??;
         let src_str = src.to_string_lossy().into_owned();
         let parent = src.parent().unwrap().to_string_lossy().into_owned();
         let img_id = Uuid::new_v4().to_string();
@@ -128,6 +148,9 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
             width,
             height,
             parent_dir_path: parent,
+            imported_date: imported_date.clone(),
+            modified_date,
+            creation_date
         });
     }
 

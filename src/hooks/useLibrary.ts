@@ -75,10 +75,12 @@ export function useLibrary() {
     if (!srcDir) return;
 
     try {
-      const { folders, images, pathLinks } = await invoke<ImportResult>(
+      const { folders, images, path_links } = await invoke<ImportResult>(
         "import_images",
         { sourceDir: srcDir, destDir: rootDir }
       );
+
+      console.log("Import result:", { folders, images})
 
       const dbPath = `${rootDir}/library.db`;
       await insertFolders(dbPath, folders);
@@ -86,8 +88,8 @@ export function useLibrary() {
 
       const links = images
         .map((img) => ({
-          folder_id: pathLinks[img.parentDirPath],
-          image_id: pathLinks[img.sourcePath],
+          folder_id: path_links[img.parent_dir_path],
+          image_id: path_links[img.source_path],
         }))
         .filter((l) => l.folder_id && l.image_id);
 

@@ -4,6 +4,7 @@ import { useFolders } from '@/hooks/useFolders';
 import { useImages } from '@/hooks/useImages';
 import { useLibrary } from '@/hooks/useLibrary';
 import { createFileRoute} from '@tanstack/react-router'
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/route/$filterId')({
   component: () => {
@@ -24,15 +25,26 @@ export const Route = createFileRoute('/route/$filterId')({
     const type = isSystemFilter ? filterId : "byFolder";
     const id = isSystemFilter ? undefined : filterId;
 
-    const { images } = useImages(dbPath, type, id);
+    const folderData = folderTree?.[id || ""];
+    const orderBy = folderData?.order_by || "imported_date";
+    const isAscending = folderData?.is_ascending === 1;
+    const { images } = useImages(dbPath, type, id, orderBy, isAscending);
+
+    useEffect(() => {
+      console.log("FolderTree:", folderTree)
+      console.log("FolderData:", folderData);
+
+    }, [filterId])
 
     // Determine title
     const title = isSystemFilter
       ? filterId.charAt(0).toUpperCase() + filterId.slice(1)
       : (id !== undefined && folderTree?.[id]?.name) || "Folder";
 
+    
+
     return (
-      <GalleryLayout title={title}>
+      <GalleryLayout title={title} folderId={id}>
         <ImagesGallery images={images} />
       </GalleryLayout>
     );

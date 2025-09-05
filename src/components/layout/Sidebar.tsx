@@ -135,7 +135,7 @@ function Sidebar() {
 
      const totalFolderCount = countAllFolders(folderTree);
      
-     console.log(totalFolderCount)
+    /*  console.log(totalFolderCount) */
 
 
   return (

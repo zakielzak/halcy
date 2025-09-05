@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS folders (
    name TEXT NOT NULL,
    parent_id TEXT,
    description TEXT,
+   order_by TEXT DEFAULT 'imported_date',
+   is_ascending INTEGER DEFAULT 1,
+
 
    FOREIGN KEY(parent_id) REFERENCES folders(id) ON DELETE CASCADE
 );
@@ -12,7 +15,10 @@ CREATE TABLE IF NOT EXISTS images (
    filename TEXT NOT NULL,
    path TEXT NOT NULL,
    width TEXT NOT NULL,
-   height TEXT NOT NULL
+   height TEXT NOT NULL,
+   imported_date TEXT NOT NULL,
+   modified_date TEXT NOT NULL,
+   creation_date TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS folder_images (

@@ -33,6 +33,8 @@ export default function FileTree() {
   } = useCounts(`${rootDir}/library.db`);
 
 
+
+
   const tree = useTree({
     rootItemId: "root",
     dataLoader: {
@@ -59,6 +61,13 @@ export default function FileTree() {
     virtualizer.measure();
   }, [tree.getItems(), virtualizer]);
 
+
+  console.log("folderTree:",folderTree);
+  console.log("tree:", tree);
+
+  console.log("tree.getItems:", tree.getItems());
+
+
   if (isLoading) return <div className="p-4 text-gray-500">Loading…</div>;
   if (isError || !folderTree)
     return <div className="p-4 text-red-500">Failed to load folders.</div>;
@@ -68,6 +77,8 @@ export default function FileTree() {
       <Tree indent={indent} tree={tree}>
         {tree.getItems().map((item) => {
           const folderId = item.getId();
+
+          console.log(item)
 
           const count = counts?.folders?.[folderId] ?? 0;
           return (

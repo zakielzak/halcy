@@ -34,4 +34,5 @@ image = "0.25.6"
 uuid = { version = "1.18.0", features = ["v4"] }
 anyhow = "1.0.99"
 tauri-plugin-persisted-scope = "2"
+chrono = "0.4.41"
 

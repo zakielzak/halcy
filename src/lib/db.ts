@@ -10,6 +10,9 @@ export interface ImageRecord {
   //mtime: number;
   width: number;
   height: number;
+  imported_date: string;
+  modified_date: string;
+  creation_date: string;
   //ext: string;
   //description: string;
   //url_origin: string;
@@ -21,6 +24,8 @@ export interface FolderRecord {
   id: string;
   name: string;
   parent_id: string | null;
+  order_by: string;
+  is_ascending: number
   /*   description: string | null; */
   /*  imported_date: string;
   modification_date: string;
@@ -56,27 +61,34 @@ export async function connect(dbPath: string): Promise<Database> {
   }
 }
 
-export const fetchFolders = (path: string) =>
-  connect(path).then((db) =>
-    db.select<FolderRecord[]>("SELECT * FROM folders")
-  );
+export const fetchFolders = async (path: string) => {
+  const db = await connect(path);
+
+
+  return db.select<FolderRecord[]>("SELECT * FROM folders");
+};
+
 
 export const fetchImages = async (
   path: string,
   type: string,
-  id?: string
+  id: string | undefined,
+  orderBy: string = "imported_date",
+  isAscending: boolean = false
 ): Promise<ImageRecord[]> => {
   const db = await connect(path);
   let sql = "";
   let params: any[] = [];
 
+  const sortDirection = isAscending ? "ASC" : "DESC";
+  const orderClause = `ORDER BY ${orderBy} ${sortDirection}`;
+
   switch (type) {
     case "all":
-      sql = "SELECT * FROM images;";
+      sql = `SELECT * FROM images ${orderClause};`;
       break;
     case "uncategorized":
-      sql =
-        "SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images);";
+      sql = `SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images) ${orderClause};`;
       break;
     case "byFolder":
       if (!id) throw new Error("Folder ID is required for 'byFolder' type");
@@ -85,7 +97,7 @@ export const fetchImages = async (
       i.*
       FROM images i
       JOIN folder_images fi ON i.id = fi.image_id
-      WHERE fi.folder_id = ?;
+      WHERE fi.folder_id = ? ${orderClause};
       `;
       params = [id];
       break;
@@ -93,8 +105,24 @@ export const fetchImages = async (
       throw new Error(`Invalid image query type: ${type}`);
   }
 
-  return db.select<ImageRecord[]>(sql, params);
+  let result = db.select<ImageRecord[]>(sql, params);
+  console.log(result)
+  return result
 };
+
+export const updateFolder = async (
+  dbPath: string,
+  folderId: string,
+  orderBy: string,
+  isAscending: boolean
+) => {
+  const db = await connect(dbPath);
+  const isAscendingInt = isAscending ? 1 : 0;
+  await db.execute(
+    `UPDATE folders SET order_by = $1, is_ascending = $2 WHERE id = $3`, 
+    [orderBy, isAscendingInt, folderId]
+  )
+}
 
 export const insertImages = async (
   path: string,
@@ -102,12 +130,12 @@ export const insertImages = async (
 ): Promise<void> => {
   if (!rows.length) return;
   const db = await connect(path);
-  const sql = `INSERT INTO images(id, filename, path, width, height)
-               VALUES ${Array(rows.length).fill("(?,?,?,?,?)").join(",")}`;
+  const sql = `INSERT INTO images(id, filename, path, width, height, imported_date, modified_date, creation_date)
+               VALUES ${Array(rows.length).fill("(?,?,?,?,?,?,?,?)").join(",")}`;
   const params: any[] = [];
   for (const r of rows)
-    params.push(r.id, r.filename, r.path, r.width, r.height);
-  await db.execute(sql, params);
+    params.push(r.id, r.filename, r.path, r.width, r.height, r.imported_date, r.modified_date, r.creation_date);
+   await db.execute(sql, params);
 };
 
 export const insertFolders = async (
@@ -115,11 +143,12 @@ export const insertFolders = async (
   rows: FolderRecord[]
 ): Promise<void> => {
   if (!rows.length) return;
+  console.log(rows)
   const db = await connect(path);
-  const sql = `INSERT INTO folders(id, name, parent_id)
-               VALUES ${Array(rows.length).fill("(?,?,?)").join(",")}`;
+  const sql = `INSERT INTO folders(id, name, parent_id, order_by, is_ascending)
+               VALUES ${Array(rows.length).fill("(?,?,?,?,?)").join(",")}`;
   const params: any[] = [];
-  for (const r of rows) params.push(r.id, r.name, r.parent_id);
+  for (const r of rows) params.push(r.id, r.name, r.parent_id, r.order_by, r.is_ascending);
   await db.execute(sql, params);
 };
 

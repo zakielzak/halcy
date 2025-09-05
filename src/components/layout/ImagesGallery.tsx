@@ -51,6 +51,10 @@ function ImagesGallery({ images }: { images?: ImageRecord[] }) {
   const gap = 13;
   const gapX = 0;
   const listImages = useMemo(() => images ?? [], [images]);
+
+    useEffect(() => {
+      console.log("En Images Gallery:", listImages);
+    }, []);
   // Observer para obtener el ancho del contenedor de forma reactiva
   useEffect(() => {
     let observer: ResizeObserver;
