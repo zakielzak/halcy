@@ -2,6 +2,7 @@ import { useImages } from "@/hooks/useImages";
 import { useLibrary } from "@/hooks/useLibrary";
 import { useSetting } from "@/hooks/useSettings";
 import { ImageRecord } from "@/lib/db";
+import { useInspectorStore } from "@/store/inspectorStore";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,6 +12,7 @@ import { LazyLoadImage } from "react-lazy-load-image-component";
 const ImageCard = ({
   image,
   style,
+  onClick,
 }: {
   image: {
     path: string;
@@ -18,18 +20,19 @@ const ImageCard = ({
     height: number;
   };
   style: React.CSSProperties;
+  onClick: () => void;
 }) => {
   const imageUrl = convertFileSrc(image.path);
   return (
     <div
       style={style}
       className=" rounded-md shadow-lg overflow-hidden flex items-center justify-center"
+      onClick={onClick}
     >
       <LazyLoadImage
         src={imageUrl}
         alt={image.path.split("/").pop() || ""}
         className="w-full h-full object-fill transition-opacity duration-300"
-       
         width={image.width}
         height={image.height}
       />
@@ -39,6 +42,7 @@ const ImageCard = ({
 
 function ImagesGallery({ images }: { images?: ImageRecord[] }) {
  /*  const { rootDir } = useLibrary(); */
+ const { setSelectedItem } = useInspectorStore();
 
    const [rootDir, setRootDir] = useSetting("rootDir", "");
 
@@ -124,6 +128,9 @@ function ImagesGallery({ images }: { images?: ImageRecord[] }) {
                 transform: `translateY(${virtualItem.start}px)`,
                 height: `${calculatedHeight}px`,
               }}
+              onClick={() =>
+                setSelectedItem({ id: item.id, type: "image", data: item })
+              }
             />
           );
         })}

@@ -12,6 +12,8 @@ import { useFolders } from "@/hooks/useFolders";
 import { useLibrary } from "@/hooks/useLibrary";
 import { Link } from "@tanstack/react-router";
 import { useCounts } from "@/hooks/useCounts";
+import { useInspectorStore } from "@/store/inspectorStore";
+import { FolderRecord } from "@/lib/db";
 
 
 
@@ -31,6 +33,8 @@ export default function FileTree() {
     isLoading: isCountsLoading,
     isError: isCountsError,
   } = useCounts(`${rootDir}/library.db`);
+
+  const {setSelectedItem } = useInspectorStore()
 
 
 
@@ -62,11 +66,6 @@ export default function FileTree() {
   }, [tree.getItems(), virtualizer]);
 
 
-  console.log("folderTree:",folderTree);
-  console.log("tree:", tree);
-
-  console.log("tree.getItems:", tree.getItems());
-
 
   if (isLoading) return <div className="p-4 text-gray-500">Loading…</div>;
   if (isError || !folderTree)
@@ -78,7 +77,8 @@ export default function FileTree() {
         {tree.getItems().map((item) => {
           const folderId = item.getId();
 
-          console.log(item)
+           const folderData = folderTree[folderId];
+           
 
           const count = counts?.folders?.[folderId] ?? 0;
           return (
@@ -87,6 +87,13 @@ export default function FileTree() {
               to="/route/$filterId"
               params={{ filterId: folderId }}
               className="w-full"
+              onClick={() =>
+                setSelectedItem({
+                  id: folderId,
+                  type: "folder",
+                  data: folderData as unknown as FolderRecord,
+                })
+              }
             >
               <TreeItem key={item.getId()} item={item} className="mr-2.5 ">
                 <TreeItemLabel count={count} />

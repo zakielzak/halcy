@@ -71,13 +71,13 @@ export const fetchFolders = async (path: string) => {
 
 export const fetchImages = async (
   path: string,
-  type: string,
+  type: "all" | "uncategorized" | "byFolder" | "byId",
   id: string | undefined,
   orderBy: string = "imported_date",
   isAscending: boolean = false
 ): Promise<ImageRecord[]> => {
   const db = await connect(path);
-  let sql = "";
+  /*   let sql = "";
   let params: any[] = [];
 
   const sortDirection = isAscending ? "ASC" : "DESC";
@@ -90,6 +90,8 @@ export const fetchImages = async (
     case "uncategorized":
       sql = `SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images) ${orderClause};`;
       break;
+
+    case "byId":
     case "byFolder":
       if (!id) throw new Error("Folder ID is required for 'byFolder' type");
       sql = `
@@ -104,10 +106,35 @@ export const fetchImages = async (
     default:
       throw new Error(`Invalid image query type: ${type}`);
   }
+ */
+  const SQL_QUERIES = {
+    all: "SELECT * FROM images",
+    uncategorized:
+      "SELECT * FROM images WHERE id NOT IN (SELECT image_id FROM folder_images)",
+    byFolder:
+      "SELECT i.* FROM images i JOIN folder_images fi ON i.id = fi.image_id WHERE fi.folder_id = ?",
+    byId: "SELECT * FROM images WHERE id = ?",
+  };
+  // Gets the SQL template from the map or throws an error if not found.
+  const sqlTemplate = SQL_QUERIES[type];
+  if (!sqlTemplate) {
+    throw new Error(`Invalid image query type: ${type}`);
+  }
 
-  let result = db.select<ImageRecord[]>(sql, params);
-  console.log(result)
-  return result
+  // Determines the sort direction.
+  const sortDirection = isAscending ? "ASC" : "DESC";
+  const orderClause = `ORDER BY ${orderBy} ${sortDirection}`;
+
+  let sql = `${sqlTemplate} ${orderClause};`;
+  let params: any[] = [];
+
+  // Handles parameters for specific query types.
+  if (type === "byFolder" || type === "byId") {
+    if (!id) throw new Error(`${type} query type requires an ID.`);
+    params = [id];
+  }
+
+  return await db.select<ImageRecord[]>(sql, params);
 };
 
 export const updateFolder = async (

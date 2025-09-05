@@ -8,7 +8,13 @@ import { useQuery } from "@tanstack/react-query";
  * @param id (Optional) The ID for the query, e.g., folderId.
  */
 
-export const useImages = (dbPath: string, type: string, folderId: string | undefined, orderBy?: string, isAscending?: boolean) => {
+export const useImages = (
+  dbPath: string,
+  type: "all" | "uncategorized" | "byFolder" | "byId",
+  folderId: string | undefined,
+  orderBy?: string,
+  isAscending?: boolean
+) => {
   const {
     data: images,
     isLoading,
@@ -16,7 +22,8 @@ export const useImages = (dbPath: string, type: string, folderId: string | undef
   } = useQuery<ImageRecord[]>({
     queryKey: ["images", dbPath, type, folderId, orderBy, isAscending],
     queryFn: () => fetchImages(dbPath, type, folderId, orderBy, isAscending),
-    enabled: !!dbPath && !!type,
+    enabled:
+      !!dbPath && !!type && ((type !== "byFolder" && type !== "byId") || !!folderId),
   });
 
   return {

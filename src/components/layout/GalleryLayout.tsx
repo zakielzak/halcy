@@ -81,8 +81,9 @@ export const GalleryLayout = ({ title, children, folderId }: Props) => {
               <SelectGroup>
                 <SelectItem value="imported_date">Date Added</SelectItem>
                 <SelectItem value="modified_date">Date Modified</SelectItem>
-                <SelectItem value="title">Title</SelectItem>
-                <SelectItem value="extension">Extension</SelectItem>
+                <SelectItem value="creation_date">Date Created</SelectItem>
+                <SelectItem value="filename">Title</SelectItem>
+               {/*  <SelectItem value="extension">Extension</SelectItem> */}
               </SelectGroup>
             </SelectContent>
           </Select>

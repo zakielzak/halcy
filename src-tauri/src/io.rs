@@ -133,7 +133,6 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
         .collect();
 
     let mut images = Vec::with_capacity(handles.len());
-    let imported_date = Utc::now().to_string();
     for h in handles {
         let (src, dst, width, height , modified_date, creation_date) = h.await??;
         let src_str = src.to_string_lossy().into_owned();
@@ -148,7 +147,7 @@ pub async fn import_folder(source: &Path, dest: &Path) -> Result<ImportResult> {
             width,
             height,
             parent_dir_path: parent,
-            imported_date: imported_date.clone(),
+            imported_date: Utc::now().to_string(),
             modified_date,
             creation_date
         });
