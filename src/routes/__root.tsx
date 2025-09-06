@@ -4,6 +4,7 @@ import { Outlet, createRootRoute } from "@tanstack/react-router";
 
 import Sidebar from "@/components/layout/Sidebar";
 import Inspector from "@/components/layout/Inspector";
+import ImageViewer from "@/components/ImageViewer";
 
 
 export const Route = createRootRoute({
@@ -23,6 +24,7 @@ function RootComponent() {
       {/* CONTENT */}
       <main className="main flex flex-col bg-[#18191c]">
         <Outlet />
+        <ImageViewer />
       </main>
 
       <Inspector />

@@ -2,6 +2,7 @@ import { useImages } from "@/hooks/useImages";
 import { useLibrary } from "@/hooks/useLibrary";
 import { useSetting } from "@/hooks/useSettings";
 import { ImageRecord } from "@/lib/db";
+import { useImageViewerStore } from "@/store/imageViewerStore";
 import { useInspectorStore } from "@/store/inspectorStore";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { convertFileSrc } from "@tauri-apps/api/core";
@@ -13,6 +14,7 @@ const ImageCard = ({
   image,
   style,
   onClick,
+  onDoubleClick
 }: {
   image: {
     path: string;
@@ -21,6 +23,7 @@ const ImageCard = ({
   };
   style: React.CSSProperties;
   onClick: () => void;
+  onDoubleClick: () => void;
 }) => {
   const imageUrl = convertFileSrc(image.path);
   return (
@@ -28,6 +31,7 @@ const ImageCard = ({
       style={style}
       className=" rounded-md shadow-lg overflow-hidden flex items-center justify-center"
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
     >
       <LazyLoadImage
         src={imageUrl}
@@ -45,6 +49,8 @@ function ImagesGallery({ images }: { images?: ImageRecord[] }) {
  const { setSelectedItem } = useInspectorStore();
 
    const [rootDir, setRootDir] = useSetting("rootDir", "");
+
+   const { openViewer } = useImageViewerStore();
 
  /*  const { images } = useImages(`${rootDir}/library.db`); */
 
@@ -131,6 +137,7 @@ function ImagesGallery({ images }: { images?: ImageRecord[] }) {
               onClick={() =>
                 setSelectedItem({ id: item.id, type: "image", data: item })
               }
+              onDoubleClick={() => openViewer(listImages, virtualItem.index)}
             />
           );
         })}
